@@ -1,5 +1,39 @@
 import 'package:flutter/material.dart';
 
+/// Represents an ingredient within a recipe.
+class Ingredient {
+  final String id;
+  final String name;
+
+  Ingredient({required this.id, required this.name});
+
+  /// Creates a new Ingredient with a unique ID.
+  factory Ingredient.create({required String name}) {
+    return Ingredient(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
+    );
+  }
+}
+
+/// Represents a recipe containing a list of ingredients.
+class Recipe {
+  final String id;
+  final String name;
+  final List<Ingredient> ingredients;
+
+  Recipe({required this.id, required this.name, List<Ingredient>? ingredients})
+      : ingredients = ingredients ?? [];
+
+  /// Creates a new Recipe with a unique ID.
+  factory Recipe.create({required String name}) {
+    return Recipe(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
+    );
+  }
+}
+
 void main() {
   runApp(const MyApp());
 }
