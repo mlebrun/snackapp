@@ -65,6 +65,15 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final List<Recipe> _recipes = [];
   final TextEditingController _textController = TextEditingController();
+  final Map<String, TextEditingController> _ingredientControllers = {};
+
+  /// Gets or creates a TextEditingController for a recipe's ingredient input.
+  TextEditingController _getIngredientController(String recipeId) {
+    return _ingredientControllers.putIfAbsent(
+      recipeId,
+      () => TextEditingController(),
+    );
+  }
 
   void _addRecipe() {
     final text = _textController.text.trim();
@@ -77,9 +86,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _removeRecipe(int index) {
+    final recipeId = _recipes[index].id;
     setState(() {
       _recipes.removeAt(index);
     });
+    // Clean up the ingredient controller for this recipe
+    _ingredientControllers[recipeId]?.dispose();
+    _ingredientControllers.remove(recipeId);
   }
 
   void _addIngredient(int recipeIndex, String name) {
@@ -102,6 +115,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void dispose() {
     _textController.dispose();
+    for (final controller in _ingredientControllers.values) {
+      controller.dispose();
+    }
+    _ingredientControllers.clear();
     super.dispose();
   }
 
@@ -123,12 +140,84 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemCount: _recipes.length,
                     itemBuilder: (context, index) {
                       final recipe = _recipes[index];
-                      return ListTile(
+                      final ingredientController = _getIngredientController(recipe.id);
+                      return ExpansionTile(
                         title: Text(recipe.name),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete),
                           onPressed: () => _removeRecipe(index),
                         ),
+                        children: [
+                          // Ingredient list or empty placeholder
+                          if (recipe.ingredients.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 8.0,
+                              ),
+                              child: Text(
+                                'No ingredients yet. Add one below!',
+                                style: TextStyle(
+                                  fontStyle: FontStyle.italic,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            )
+                          else
+                            ...recipe.ingredients.asMap().entries.map(
+                              (entry) {
+                                final ingredientIndex = entry.key;
+                                final ingredient = entry.value;
+                                return ListTile(
+                                  leading: const Icon(Icons.circle, size: 8),
+                                  title: Text(ingredient.name),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.remove_circle_outline),
+                                    onPressed: () => _removeIngredient(
+                                      index,
+                                      ingredientIndex,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          // Add ingredient input row
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 8.0,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: ingredientController,
+                                    decoration: const InputDecoration(
+                                      hintText: 'Add ingredient',
+                                      border: OutlineInputBorder(),
+                                      isDense: true,
+                                    ),
+                                    onSubmitted: (value) {
+                                      _addIngredient(index, value);
+                                      ingredientController.clear();
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  onPressed: () {
+                                    _addIngredient(
+                                      index,
+                                      ingredientController.text,
+                                    );
+                                    ingredientController.clear();
+                                  },
+                                  icon: const Icon(Icons.add),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       );
                     },
                   ),
