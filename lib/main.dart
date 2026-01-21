@@ -44,11 +44,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Recipe List',
+      title: 'Snack Recipes',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'My Recipes'),
+      home: const MyHomePage(title: 'Snack Recipes'),
     );
   }
 }
