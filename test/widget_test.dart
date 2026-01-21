@@ -299,7 +299,7 @@ void main() {
   });
 
   group('Stock status toggle', () {
-    testWidgets('New recipe defaults to in-stock', (WidgetTester tester) async {
+    testWidgets('New recipe defaults to out-of-stock', (WidgetTester tester) async {
       await tester.pumpWidget(const MyApp());
 
       // Add a recipe
@@ -307,15 +307,15 @@ void main() {
       await tester.tap(find.byIcon(Icons.add));
       await tester.pump();
 
-      // Verify Switch is present and defaulted to true (in-stock)
+      // Verify Switch is present and defaulted to false (out-of-stock)
       final switchFinder = find.byType(Switch);
       expect(switchFinder, findsOneWidget);
 
       final switchWidget = tester.widget<Switch>(switchFinder);
-      expect(switchWidget.value, isTrue);
+      expect(switchWidget.value, isFalse);
     });
 
-    testWidgets('Can toggle recipe to out of stock',
+    testWidgets('Can toggle recipe to in stock',
         (WidgetTester tester) async {
       await tester.pumpWidget(const MyApp());
 
@@ -324,19 +324,19 @@ void main() {
       await tester.tap(find.byIcon(Icons.add));
       await tester.pump();
 
-      // Verify initial state is in-stock
+      // Verify initial state is out-of-stock
       final switchFinder = find.byType(Switch);
-      expect(tester.widget<Switch>(switchFinder).value, isTrue);
+      expect(tester.widget<Switch>(switchFinder).value, isFalse);
 
-      // Tap the switch to toggle to out-of-stock
+      // Tap the switch to toggle to in-stock
       await tester.tap(switchFinder);
       await tester.pump();
 
-      // Verify the switch is now off (out of stock)
-      expect(tester.widget<Switch>(switchFinder).value, isFalse);
+      // Verify the switch is now on (in stock)
+      expect(tester.widget<Switch>(switchFinder).value, isTrue);
     });
 
-    testWidgets('Can toggle recipe back to in stock',
+    testWidgets('Can toggle recipe back to out of stock',
         (WidgetTester tester) async {
       await tester.pumpWidget(const MyApp());
 
@@ -347,15 +347,15 @@ void main() {
 
       final switchFinder = find.byType(Switch);
 
-      // Toggle to out-of-stock
-      await tester.tap(switchFinder);
-      await tester.pump();
-      expect(tester.widget<Switch>(switchFinder).value, isFalse);
-
-      // Toggle back to in-stock
+      // Toggle to in-stock
       await tester.tap(switchFinder);
       await tester.pump();
       expect(tester.widget<Switch>(switchFinder).value, isTrue);
+
+      // Toggle back to out-of-stock
+      await tester.tap(switchFinder);
+      await tester.pump();
+      expect(tester.widget<Switch>(switchFinder).value, isFalse);
     });
 
     testWidgets('Out of stock recipe has reduced opacity',
@@ -368,20 +368,20 @@ void main() {
       await tester.pump();
 
       // Find the Opacity widget wrapping the recipe name text
-      // When in-stock, opacity should be 1.0
+      // When out-of-stock (default), opacity should be 0.5
       final opacityFinder = find.ancestor(
         of: find.text('Opacity Recipe'),
         matching: find.byType(Opacity),
       );
       expect(opacityFinder, findsOneWidget);
-      expect(tester.widget<Opacity>(opacityFinder).opacity, equals(1.0));
+      expect(tester.widget<Opacity>(opacityFinder).opacity, equals(0.5));
 
-      // Toggle to out-of-stock
+      // Toggle to in-stock
       await tester.tap(find.byType(Switch));
       await tester.pump();
 
-      // Verify the opacity is now reduced (0.5)
-      expect(tester.widget<Opacity>(opacityFinder).opacity, equals(0.5));
+      // Verify the opacity is now full (1.0)
+      expect(tester.widget<Opacity>(opacityFinder).opacity, equals(1.0));
     });
 
     testWidgets('Toggle works when recipe is expanded',
@@ -400,16 +400,16 @@ void main() {
       // Verify recipe is expanded (ingredients placeholder visible)
       expect(find.text('No ingredients yet. Add one below!'), findsOneWidget);
 
-      // Verify initial state is in-stock
+      // Verify initial state is out-of-stock
       final switchFinder = find.byType(Switch);
-      expect(tester.widget<Switch>(switchFinder).value, isTrue);
+      expect(tester.widget<Switch>(switchFinder).value, isFalse);
 
-      // Toggle to out-of-stock while expanded
+      // Toggle to in-stock while expanded
       await tester.tap(switchFinder);
       await tester.pump();
 
       // Verify the switch toggled
-      expect(tester.widget<Switch>(switchFinder).value, isFalse);
+      expect(tester.widget<Switch>(switchFinder).value, isTrue);
 
       // Verify recipe is still expanded
       expect(find.text('No ingredients yet. Add one below!'), findsOneWidget);
@@ -434,22 +434,22 @@ void main() {
       await tester.tap(find.byIcon(Icons.add));
       await tester.pump();
 
-      // Verify all three switches exist and are in-stock
+      // Verify all three switches exist and are out-of-stock (default)
       final switchFinders = find.byType(Switch);
       expect(switchFinders, findsNWidgets(3));
 
-      // Toggle only the middle recipe (index 1) to out-of-stock
+      // Toggle only the middle recipe (index 1) to in-stock
       await tester.tap(switchFinders.at(1));
       await tester.pump();
 
-      // Verify first recipe is still in-stock
-      expect(tester.widget<Switch>(switchFinders.at(0)).value, isTrue);
+      // Verify first recipe is still out-of-stock
+      expect(tester.widget<Switch>(switchFinders.at(0)).value, isFalse);
 
-      // Verify middle recipe is out-of-stock
-      expect(tester.widget<Switch>(switchFinders.at(1)).value, isFalse);
+      // Verify middle recipe is in-stock
+      expect(tester.widget<Switch>(switchFinders.at(1)).value, isTrue);
 
-      // Verify third recipe is still in-stock
-      expect(tester.widget<Switch>(switchFinders.at(2)).value, isTrue);
+      // Verify third recipe is still out-of-stock
+      expect(tester.widget<Switch>(switchFinders.at(2)).value, isFalse);
     });
 
     testWidgets('Ingredients also grey when recipe is out of stock',
@@ -483,18 +483,19 @@ void main() {
       // Find the Opacity widget ancestor of the ingredient
       final opacityWidgets = find.byType(Opacity);
 
-      // Toggle to out-of-stock
+      // Initially out-of-stock (default), so opacity should be 0.5
+      var allOpacityWidgets = tester.widgetList<Opacity>(opacityWidgets);
+      var hasReducedOpacity = allOpacityWidgets.any((opacity) => opacity.opacity == 0.5);
+      expect(hasReducedOpacity, isTrue);
+
+      // Toggle to in-stock
       await tester.tap(find.byType(Switch));
       await tester.pump();
 
-      // After toggle, the Opacity wrapping children should have 0.5 value
-      // Find all Opacity widgets and check their values
-      final allOpacityWidgets = tester.widgetList<Opacity>(opacityWidgets);
-
-      // Check that at least one Opacity widget has 0.5 opacity
-      // (there are two - one for title text, one for children/ingredients)
-      final hasReducedOpacity = allOpacityWidgets.any((opacity) => opacity.opacity == 0.5);
-      expect(hasReducedOpacity, isTrue);
+      // After toggle, the Opacity wrapping children should have 1.0 value
+      allOpacityWidgets = tester.widgetList<Opacity>(opacityWidgets);
+      final hasFullOpacity = allOpacityWidgets.any((opacity) => opacity.opacity == 1.0);
+      expect(hasFullOpacity, isTrue);
     });
   });
 }

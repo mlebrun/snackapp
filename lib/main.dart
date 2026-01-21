@@ -27,7 +27,7 @@ class Recipe {
     required this.id,
     required this.name,
     List<Ingredient>? ingredients,
-    this.isInStock = true,
+    this.isInStock = false,
   }) : ingredients = ingredients ?? [];
 
   /// Creates a new Recipe with a unique ID.
