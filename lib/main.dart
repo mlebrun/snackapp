@@ -82,6 +82,23 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _addIngredient(int recipeIndex, String name) {
+    final trimmedName = name.trim();
+    if (trimmedName.isNotEmpty) {
+      setState(() {
+        _recipes[recipeIndex].ingredients.add(
+          Ingredient.create(name: trimmedName),
+        );
+      });
+    }
+  }
+
+  void _removeIngredient(int recipeIndex, int ingredientIndex) {
+    setState(() {
+      _recipes[recipeIndex].ingredients.removeAt(ingredientIndex);
+    });
+  }
+
   @override
   void dispose() {
     _textController.dispose();
