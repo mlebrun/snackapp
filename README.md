@@ -1,16 +1,9 @@
 # snackapp
 
-A new Flutter project.
+An app to help you plan what snack you'll have before you make it to the pantry.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Features:
+- List of snacks that you have in stock
+- Add new snacks and the ingredients you need to make them
+- Easily add ingredients to rudimentary grocery list
+- Simple buttons to denote snacks that are in or out of stock
