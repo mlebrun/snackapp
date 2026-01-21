@@ -156,7 +156,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         title: Row(
                           children: [
                             Expanded(
-                              child: Text(recipe.name),
+                              child: Opacity(
+                                opacity: recipe.isInStock ? 1.0 : 0.5,
+                                child: Text(recipe.name),
+                              ),
                             ),
                             Switch(
                               value: recipe.isInStock,
@@ -170,94 +173,102 @@ class _MyHomePageState extends State<MyHomePage> {
                           onPressed: () => _removeRecipe(index),
                         ),
                         children: [
-                          // Ingredient list or empty placeholder
-                          if (recipe.ingredients.isEmpty)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 32.0,
-                                vertical: 8.0,
-                              ),
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  'No ingredients yet. Add one below!',
-                                  style: TextStyle(
-                                    fontStyle: FontStyle.italic,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ),
-                            )
-                          else
-                            ...recipe.ingredients.asMap().entries.map(
-                              (entry) {
-                                final ingredientIndex = entry.key;
-                                final ingredient = entry.value;
-                                return ListTile(
-                                  contentPadding: const EdgeInsets.only(
-                                    left: 32.0,
-                                    right: 16.0,
-                                  ),
-                                  leading: const Icon(
-                                    Icons.circle,
-                                    size: 8,
-                                    color: Colors.grey,
-                                  ),
-                                  title: Text(ingredient.name),
-                                  trailing: IconButton(
-                                    icon: const Icon(
-                                      Icons.remove_circle_outline,
-                                      color: Colors.redAccent,
-                                    ),
-                                    tooltip: 'Remove ingredient',
-                                    onPressed: () => _removeIngredient(
-                                      index,
-                                      ingredientIndex,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          // Add ingredient input row
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 32.0,
-                              right: 16.0,
-                              top: 8.0,
-                              bottom: 16.0,
-                            ),
-                            child: Row(
+                          Opacity(
+                            opacity: recipe.isInStock ? 1.0 : 0.5,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: ingredientController,
-                                    decoration: const InputDecoration(
-                                      hintText: 'Add ingredient',
-                                      border: OutlineInputBorder(),
-                                      isDense: true,
-                                      contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 12.0,
-                                        vertical: 10.0,
+                                // Ingredient list or empty placeholder
+                                if (recipe.ingredients.isEmpty)
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 32.0,
+                                      vertical: 8.0,
+                                    ),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        'No ingredients yet. Add one below!',
+                                        style: TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                          color: Colors.grey,
+                                        ),
                                       ),
                                     ),
-                                    onSubmitted: (value) {
-                                      _addIngredient(index, value);
-                                      ingredientController.clear();
+                                  )
+                                else
+                                  ...recipe.ingredients.asMap().entries.map(
+                                    (entry) {
+                                      final ingredientIndex = entry.key;
+                                      final ingredient = entry.value;
+                                      return ListTile(
+                                        contentPadding: const EdgeInsets.only(
+                                          left: 32.0,
+                                          right: 16.0,
+                                        ),
+                                        leading: const Icon(
+                                          Icons.circle,
+                                          size: 8,
+                                          color: Colors.grey,
+                                        ),
+                                        title: Text(ingredient.name),
+                                        trailing: IconButton(
+                                          icon: const Icon(
+                                            Icons.remove_circle_outline,
+                                            color: Colors.redAccent,
+                                          ),
+                                          tooltip: 'Remove ingredient',
+                                          onPressed: () => _removeIngredient(
+                                            index,
+                                            ingredientIndex,
+                                          ),
+                                        ),
+                                      );
                                     },
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                IconButton(
-                                  onPressed: () {
-                                    _addIngredient(
-                                      index,
-                                      ingredientController.text,
-                                    );
-                                    ingredientController.clear();
-                                  },
-                                  icon: const Icon(Icons.add_circle),
-                                  tooltip: 'Add ingredient',
-                                  color: Theme.of(context).colorScheme.primary,
+                                // Add ingredient input row
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 32.0,
+                                    right: 16.0,
+                                    top: 8.0,
+                                    bottom: 16.0,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: TextField(
+                                          controller: ingredientController,
+                                          decoration: const InputDecoration(
+                                            hintText: 'Add ingredient',
+                                            border: OutlineInputBorder(),
+                                            isDense: true,
+                                            contentPadding: EdgeInsets.symmetric(
+                                              horizontal: 12.0,
+                                              vertical: 10.0,
+                                            ),
+                                          ),
+                                          onSubmitted: (value) {
+                                            _addIngredient(index, value);
+                                            ingredientController.clear();
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      IconButton(
+                                        onPressed: () {
+                                          _addIngredient(
+                                            index,
+                                            ingredientController.text,
+                                          );
+                                          ingredientController.clear();
+                                        },
+                                        icon: const Icon(Icons.add_circle),
+                                        tooltip: 'Add ingredient',
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
