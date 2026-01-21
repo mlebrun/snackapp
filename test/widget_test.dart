@@ -1,30 +1,45 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:snackapp/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('Add item to list', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verify empty state message is shown
+    expect(find.text('No items yet. Add one below!'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
+    // Enter text in the text field
+    await tester.enterText(find.byType(TextField), 'Test Item');
+    await tester.pump();
+
+    // Tap the add button
     await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify the item was added
+    expect(find.text('Test Item'), findsOneWidget);
+    expect(find.text('No items yet. Add one below!'), findsNothing);
+  });
+
+  testWidgets('Remove item from list', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    // Add an item first
+    await tester.enterText(find.byType(TextField), 'Item to delete');
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+
+    // Verify item exists
+    expect(find.text('Item to delete'), findsOneWidget);
+
+    // Tap the delete button
+    await tester.tap(find.byIcon(Icons.delete));
+    await tester.pump();
+
+    // Verify item was removed and empty state is shown
+    expect(find.text('Item to delete'), findsNothing);
+    expect(find.text('No items yet. Add one below!'), findsOneWidget);
   });
 }
