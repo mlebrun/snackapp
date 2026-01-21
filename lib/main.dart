@@ -44,11 +44,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Item List',
+      title: 'Recipe List',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'My Items'),
+      home: const MyHomePage(title: 'My Recipes'),
     );
   }
 }
@@ -63,22 +63,22 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<String> _items = [];
+  final List<Recipe> _recipes = [];
   final TextEditingController _textController = TextEditingController();
 
-  void _addItem() {
+  void _addRecipe() {
     final text = _textController.text.trim();
     if (text.isNotEmpty) {
       setState(() {
-        _items.add(text);
+        _recipes.add(Recipe.create(name: text));
       });
       _textController.clear();
     }
   }
 
-  void _removeItem(int index) {
+  void _removeRecipe(int index) {
     setState(() {
-      _items.removeAt(index);
+      _recipes.removeAt(index);
     });
   }
 
@@ -98,18 +98,19 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         children: [
           Expanded(
-            child: _items.isEmpty
+            child: _recipes.isEmpty
                 ? const Center(
-                    child: Text('No items yet. Add one below!'),
+                    child: Text('No recipes yet. Add one below!'),
                   )
                 : ListView.builder(
-                    itemCount: _items.length,
+                    itemCount: _recipes.length,
                     itemBuilder: (context, index) {
+                      final recipe = _recipes[index];
                       return ListTile(
-                        title: Text(_items[index]),
+                        title: Text(recipe.name),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete),
-                          onPressed: () => _removeItem(index),
+                          onPressed: () => _removeRecipe(index),
                         ),
                       );
                     },
@@ -123,15 +124,15 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: TextField(
                     controller: _textController,
                     decoration: const InputDecoration(
-                      hintText: 'Enter item name',
+                      hintText: 'Enter recipe name',
                       border: OutlineInputBorder(),
                     ),
-                    onSubmitted: (_) => _addItem(),
+                    onSubmitted: (_) => _addRecipe(),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton.filled(
-                  onPressed: _addItem,
+                  onPressed: _addRecipe,
                   icon: const Icon(Icons.add),
                 ),
               ],
