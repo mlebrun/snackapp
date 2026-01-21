@@ -153,7 +153,17 @@ class _MyHomePageState extends State<MyHomePage> {
                       final recipe = _recipes[index];
                       final ingredientController = _getIngredientController(recipe.id);
                       return ExpansionTile(
-                        title: Text(recipe.name),
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: Text(recipe.name),
+                            ),
+                            Switch(
+                              value: recipe.isInStock,
+                              onChanged: (value) => _toggleStockStatus(index),
+                            ),
+                          ],
+                        ),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete),
                           tooltip: 'Delete recipe',
