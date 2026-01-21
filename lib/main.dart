@@ -145,6 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         title: Text(recipe.name),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete),
+                          tooltip: 'Delete recipe',
                           onPressed: () => _removeRecipe(index),
                         ),
                         children: [
@@ -152,14 +153,17 @@ class _MyHomePageState extends State<MyHomePage> {
                           if (recipe.ingredients.isEmpty)
                             const Padding(
                               padding: EdgeInsets.symmetric(
-                                horizontal: 16.0,
+                                horizontal: 32.0,
                                 vertical: 8.0,
                               ),
-                              child: Text(
-                                'No ingredients yet. Add one below!',
-                                style: TextStyle(
-                                  fontStyle: FontStyle.italic,
-                                  color: Colors.grey,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'No ingredients yet. Add one below!',
+                                  style: TextStyle(
+                                    fontStyle: FontStyle.italic,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ),
                             )
@@ -169,10 +173,22 @@ class _MyHomePageState extends State<MyHomePage> {
                                 final ingredientIndex = entry.key;
                                 final ingredient = entry.value;
                                 return ListTile(
-                                  leading: const Icon(Icons.circle, size: 8),
+                                  contentPadding: const EdgeInsets.only(
+                                    left: 32.0,
+                                    right: 16.0,
+                                  ),
+                                  leading: const Icon(
+                                    Icons.circle,
+                                    size: 8,
+                                    color: Colors.grey,
+                                  ),
                                   title: Text(ingredient.name),
                                   trailing: IconButton(
-                                    icon: const Icon(Icons.remove_circle_outline),
+                                    icon: const Icon(
+                                      Icons.remove_circle_outline,
+                                      color: Colors.redAccent,
+                                    ),
+                                    tooltip: 'Remove ingredient',
                                     onPressed: () => _removeIngredient(
                                       index,
                                       ingredientIndex,
@@ -183,9 +199,11 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                           // Add ingredient input row
                           Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical: 8.0,
+                            padding: const EdgeInsets.only(
+                              left: 32.0,
+                              right: 16.0,
+                              top: 8.0,
+                              bottom: 16.0,
                             ),
                             child: Row(
                               children: [
@@ -196,6 +214,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                       hintText: 'Add ingredient',
                                       border: OutlineInputBorder(),
                                       isDense: true,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 12.0,
+                                        vertical: 10.0,
+                                      ),
                                     ),
                                     onSubmitted: (value) {
                                       _addIngredient(index, value);
@@ -212,7 +234,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                     );
                                     ingredientController.clear();
                                   },
-                                  icon: const Icon(Icons.add),
+                                  icon: const Icon(Icons.add_circle),
+                                  tooltip: 'Add ingredient',
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ],
                             ),
@@ -240,6 +264,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 IconButton.filled(
                   onPressed: _addRecipe,
                   icon: const Icon(Icons.add),
+                  tooltip: 'Add recipe',
                 ),
               ],
             ),
