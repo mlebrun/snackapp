@@ -21,9 +21,14 @@ class Recipe {
   final String id;
   final String name;
   final List<Ingredient> ingredients;
+  final bool isInStock;
 
-  Recipe({required this.id, required this.name, List<Ingredient>? ingredients})
-      : ingredients = ingredients ?? [];
+  Recipe({
+    required this.id,
+    required this.name,
+    List<Ingredient>? ingredients,
+    this.isInStock = true,
+  }) : ingredients = ingredients ?? [];
 
   /// Creates a new Recipe with a unique ID.
   factory Recipe.create({required String name}) {
