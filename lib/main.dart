@@ -21,7 +21,7 @@ class Recipe {
   final String id;
   final String name;
   final List<Ingredient> ingredients;
-  final bool isInStock;
+  bool isInStock;
 
   Recipe({
     required this.id,
@@ -98,6 +98,12 @@ class _MyHomePageState extends State<MyHomePage> {
     // Clean up the ingredient controller for this recipe
     _ingredientControllers[recipeId]?.dispose();
     _ingredientControllers.remove(recipeId);
+  }
+
+  void _toggleStockStatus(int index) {
+    setState(() {
+      _recipes[index].isInStock = !_recipes[index].isInStock;
+    });
   }
 
   void _addIngredient(int recipeIndex, String name) {
