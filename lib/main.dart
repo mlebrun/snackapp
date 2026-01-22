@@ -197,129 +197,35 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemCount: _recipes.length,
                     itemBuilder: (context, index) {
                       final recipe = _recipes[index];
-                      final ingredientController = _getIngredientController(recipe.id);
-                      return ExpansionTile(
-                        title: Row(
+                      return ListTile(
+                        onTap: () => _openRecipeDetails(context, index),
+                        title: Opacity(
+                          opacity: recipe.isInStock ? 1.0 : 0.5,
+                          child: Text(recipe.name),
+                        ),
+                        subtitle: Text(
+                          recipe.ingredients.isEmpty
+                              ? 'No ingredients'
+                              : '${recipe.ingredients.length} ingredient${recipe.ingredients.length == 1 ? '' : 's'}',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Expanded(
-                              child: Opacity(
-                                opacity: recipe.isInStock ? 1.0 : 0.5,
-                                child: Text(recipe.name),
-                              ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              tooltip: 'Delete recipe',
+                              onPressed: () => _removeRecipe(index),
                             ),
-                            Switch(
-                              value: recipe.isInStock,
-                              onChanged: (value) => _toggleStockStatus(index),
+                            const Icon(
+                              Icons.chevron_right,
+                              color: Colors.grey,
                             ),
                           ],
                         ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete),
-                          tooltip: 'Delete recipe',
-                          onPressed: () => _removeRecipe(index),
-                        ),
-                        children: [
-                          Opacity(
-                            opacity: recipe.isInStock ? 1.0 : 0.5,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Ingredient list or empty placeholder
-                                if (recipe.ingredients.isEmpty)
-                                  const Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 32.0,
-                                      vertical: 8.0,
-                                    ),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        'No ingredients yet. Add one below!',
-                                        style: TextStyle(
-                                          fontStyle: FontStyle.italic,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                else
-                                  ...recipe.ingredients.asMap().entries.map(
-                                    (entry) {
-                                      final ingredientIndex = entry.key;
-                                      final ingredient = entry.value;
-                                      return ListTile(
-                                        contentPadding: const EdgeInsets.only(
-                                          left: 32.0,
-                                          right: 16.0,
-                                        ),
-                                        leading: const Icon(
-                                          Icons.circle,
-                                          size: 8,
-                                          color: Colors.grey,
-                                        ),
-                                        title: Text(ingredient.name),
-                                        trailing: IconButton(
-                                          icon: const Icon(
-                                            Icons.remove_circle_outline,
-                                            color: Colors.redAccent,
-                                          ),
-                                          tooltip: 'Remove ingredient',
-                                          onPressed: () => _removeIngredient(
-                                            index,
-                                            ingredientIndex,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                // Add ingredient input row
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    left: 32.0,
-                                    right: 16.0,
-                                    top: 8.0,
-                                    bottom: 16.0,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: TextField(
-                                          controller: ingredientController,
-                                          decoration: const InputDecoration(
-                                            hintText: 'Add ingredient',
-                                            border: OutlineInputBorder(),
-                                            isDense: true,
-                                            contentPadding: EdgeInsets.symmetric(
-                                              horizontal: 12.0,
-                                              vertical: 10.0,
-                                            ),
-                                          ),
-                                          onSubmitted: (value) {
-                                            _addIngredient(index, value);
-                                            ingredientController.clear();
-                                          },
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      IconButton(
-                                        onPressed: () {
-                                          _addIngredient(
-                                            index,
-                                            ingredientController.text,
-                                          );
-                                          ingredientController.clear();
-                                        },
-                                        icon: const Icon(Icons.add_circle),
-                                        tooltip: 'Add ingredient',
-                                        color: Theme.of(context).colorScheme.primary,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
                       );
                     },
                   ),
