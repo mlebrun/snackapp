@@ -55,3 +55,7 @@ app.*.map.json
 .auto-claude-status
 .claude_settings.json
 .update-metadata.json
+
+# Auto Claude generated files
+.security-key
+logs/security/
