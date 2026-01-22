@@ -351,6 +351,128 @@ void main() {
       expect(find.text('Cancelled Ingredient'), findsNothing);
       expect(find.text('No ingredients yet. Add one below!'), findsOneWidget);
     });
+
+    testWidgets('Can edit ingredient name via dialog',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Add a recipe
+      await tester.enterText(find.byType(TextField), 'Edit Ingredient Recipe');
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pump();
+
+      // Open the panel
+      await tester.tap(find.text('Edit Ingredient Recipe'));
+      await tester.pumpAndSettle();
+
+      // Add an ingredient
+      final ingredientTextField = find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField &&
+            widget.decoration?.hintText == 'Add ingredient',
+      );
+      await tester.enterText(ingredientTextField, 'Original Ingredient');
+      await tester.tap(find.byIcon(Icons.add_circle));
+      await tester.pump();
+
+      // Verify ingredient exists
+      expect(find.text('Original Ingredient'), findsOneWidget);
+
+      // Tap the edit icon to open the edit dialog
+      await tester.tap(find.byIcon(Icons.edit));
+      await tester.pumpAndSettle();
+
+      // Verify the edit dialog is shown
+      expect(find.text('Edit Ingredient'), findsOneWidget);
+
+      // Find the edit dialog TextField and change the name
+      final editDialogTextField = find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField &&
+            widget.decoration?.labelText == 'Ingredient Name',
+      );
+      expect(editDialogTextField, findsOneWidget);
+
+      await tester.enterText(editDialogTextField, 'Renamed Ingredient');
+      await tester.pump();
+
+      // Tap Save in the dialog
+      await tester.tap(find.widgetWithText(TextButton, 'Save'));
+      await tester.pumpAndSettle();
+
+      // Verify the ingredient name was updated
+      expect(find.text('Renamed Ingredient'), findsOneWidget);
+      expect(find.text('Original Ingredient'), findsNothing);
+
+      // Save and reopen to verify persistence
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Edit Ingredient Recipe'));
+      await tester.pumpAndSettle();
+
+      // Verify the renamed ingredient persisted
+      expect(find.text('Renamed Ingredient'), findsOneWidget);
+    });
+
+    testWidgets('Edited ingredient reverts on cancel',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Add a recipe
+      await tester.enterText(find.byType(TextField), 'Revert Ingredient Test');
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pump();
+
+      // Open the panel and add an ingredient
+      await tester.tap(find.text('Revert Ingredient Test'));
+      await tester.pumpAndSettle();
+
+      final ingredientTextField = find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField &&
+            widget.decoration?.hintText == 'Add ingredient',
+      );
+      await tester.enterText(ingredientTextField, 'Keep This Name');
+      await tester.tap(find.byIcon(Icons.add_circle));
+      await tester.pump();
+
+      // Save to persist the ingredient
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      // Reopen the panel
+      await tester.tap(find.text('Revert Ingredient Test'));
+      await tester.pumpAndSettle();
+
+      // Edit the ingredient via dialog
+      await tester.tap(find.byIcon(Icons.edit));
+      await tester.pumpAndSettle();
+
+      final editDialogTextField = find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField &&
+            widget.decoration?.labelText == 'Ingredient Name',
+      );
+      await tester.enterText(editDialogTextField, 'Changed Name');
+      await tester.tap(find.widgetWithText(TextButton, 'Save'));
+      await tester.pumpAndSettle();
+
+      // Verify change shows in panel
+      expect(find.text('Changed Name'), findsOneWidget);
+
+      // Cancel the panel without saving
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      // Reopen the panel to verify reversion
+      await tester.tap(find.text('Revert Ingredient Test'));
+      await tester.pumpAndSettle();
+
+      // Verify the original name is preserved
+      expect(find.text('Keep This Name'), findsOneWidget);
+      expect(find.text('Changed Name'), findsNothing);
+    });
   });
 
   group('Input validation', () {
@@ -690,6 +812,208 @@ void main() {
 
       final button = tester.widget<ElevatedButton>(saveButton);
       expect(button.onPressed, isNull);
+    });
+
+    testWidgets('Whitespace-only title disables save button',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Add a recipe
+      await tester.enterText(find.byType(TextField), 'Valid Title');
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pump();
+
+      // Open the panel
+      await tester.tap(find.text('Valid Title'));
+      await tester.pumpAndSettle();
+
+      // Find the recipe name TextField and enter whitespace only
+      final titleTextField = find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField &&
+            widget.decoration?.labelText == 'Recipe Name',
+      );
+      await tester.enterText(titleTextField, '   ');
+      await tester.pump();
+
+      // Find the Save button and verify it's disabled
+      final saveButton = find.widgetWithText(ElevatedButton, 'Save');
+      expect(saveButton, findsOneWidget);
+
+      final button = tester.widget<ElevatedButton>(saveButton);
+      expect(button.onPressed, isNull);
+    });
+  });
+
+  group('Comprehensive panel edit flow', () {
+    testWidgets('Can edit multiple fields and save all changes',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Add a recipe
+      await tester.enterText(find.byType(TextField), 'Multi Edit Recipe');
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pump();
+
+      // Verify initial state
+      expect(find.text('Multi Edit Recipe'), findsOneWidget);
+      expect(find.text('No ingredients'), findsOneWidget);
+      final initialOpacity = find.ancestor(
+        of: find.text('Multi Edit Recipe'),
+        matching: find.byType(Opacity),
+      );
+      expect(
+          tester.widget<Opacity>(initialOpacity).opacity, equals(0.5)); // Out of stock
+
+      // Open the panel
+      await tester.tap(find.text('Multi Edit Recipe'));
+      await tester.pumpAndSettle();
+
+      // 1. Edit the title
+      final titleTextField = find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField &&
+            widget.decoration?.labelText == 'Recipe Name',
+      );
+      await tester.enterText(titleTextField, 'Comprehensive Recipe');
+      await tester.pump();
+
+      // 2. Toggle in-stock status
+      final switchFinder = find.byType(Switch);
+      await tester.tap(switchFinder);
+      await tester.pump();
+
+      // 3. Add ingredients
+      final ingredientTextField = find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField &&
+            widget.decoration?.hintText == 'Add ingredient',
+      );
+      await tester.enterText(ingredientTextField, 'First Item');
+      await tester.tap(find.byIcon(Icons.add_circle));
+      await tester.pump();
+
+      await tester.enterText(ingredientTextField, 'Second Item');
+      await tester.tap(find.byIcon(Icons.add_circle));
+      await tester.pump();
+
+      // Save all changes
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      // Verify all changes persisted
+      // Title changed
+      expect(find.text('Comprehensive Recipe'), findsOneWidget);
+      expect(find.text('Multi Edit Recipe'), findsNothing);
+
+      // In-stock status changed (opacity 1.0)
+      final updatedOpacity = find.ancestor(
+        of: find.text('Comprehensive Recipe'),
+        matching: find.byType(Opacity),
+      );
+      expect(tester.widget<Opacity>(updatedOpacity).opacity, equals(1.0));
+
+      // Ingredients persisted
+      expect(find.text('2 ingredients'), findsOneWidget);
+
+      // Reopen and verify ingredients are there
+      await tester.tap(find.text('Comprehensive Recipe'));
+      await tester.pumpAndSettle();
+      expect(find.text('First Item'), findsOneWidget);
+      expect(find.text('Second Item'), findsOneWidget);
+    });
+
+    testWidgets('Cancel discards all changes made to multiple fields',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Add a recipe with initial state
+      await tester.enterText(find.byType(TextField), 'Original Name');
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pump();
+
+      // Open panel and add an ingredient, then save to establish baseline
+      await tester.tap(find.text('Original Name'));
+      await tester.pumpAndSettle();
+
+      final ingredientTextField = find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField &&
+            widget.decoration?.hintText == 'Add ingredient',
+      );
+      await tester.enterText(ingredientTextField, 'Original Ingredient');
+      await tester.tap(find.byIcon(Icons.add_circle));
+      await tester.pump();
+
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      // Verify baseline
+      expect(find.text('Original Name'), findsOneWidget);
+      expect(find.text('1 ingredient'), findsOneWidget);
+      final baselineOpacity = find.ancestor(
+        of: find.text('Original Name'),
+        matching: find.byType(Opacity),
+      );
+      expect(tester.widget<Opacity>(baselineOpacity).opacity, equals(0.5)); // Out of stock
+
+      // Reopen panel and make multiple changes
+      await tester.tap(find.text('Original Name'));
+      await tester.pumpAndSettle();
+
+      // 1. Change title
+      final titleTextField = find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField &&
+            widget.decoration?.labelText == 'Recipe Name',
+      );
+      await tester.enterText(titleTextField, 'Changed Name');
+      await tester.pump();
+
+      // 2. Toggle status
+      final switchFinder = find.byType(Switch);
+      await tester.tap(switchFinder);
+      await tester.pump();
+
+      // 3. Add another ingredient
+      await tester.enterText(ingredientTextField, 'New Ingredient');
+      await tester.tap(find.byIcon(Icons.add_circle));
+      await tester.pump();
+
+      // 4. Remove original ingredient
+      // Find the first remove button (for 'Original Ingredient')
+      await tester.tap(find.byIcon(Icons.remove_circle_outline).first);
+      await tester.pump();
+
+      // Verify changes are visible in panel
+      expect(find.text('Changed Name'), findsOneWidget);
+      expect(find.text('New Ingredient'), findsOneWidget);
+      expect(find.text('Original Ingredient'), findsNothing);
+
+      // Cancel without saving
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      // Verify ALL changes were discarded
+      // Title reverted
+      expect(find.text('Original Name'), findsOneWidget);
+      expect(find.text('Changed Name'), findsNothing);
+
+      // Status reverted (still out of stock)
+      final revertedOpacity = find.ancestor(
+        of: find.text('Original Name'),
+        matching: find.byType(Opacity),
+      );
+      expect(tester.widget<Opacity>(revertedOpacity).opacity, equals(0.5));
+
+      // Ingredient count still 1
+      expect(find.text('1 ingredient'), findsOneWidget);
+
+      // Verify original ingredient is back
+      await tester.tap(find.text('Original Name'));
+      await tester.pumpAndSettle();
+      expect(find.text('Original Ingredient'), findsOneWidget);
+      expect(find.text('New Ingredient'), findsNothing);
     });
   });
 

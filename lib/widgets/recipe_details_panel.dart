@@ -125,8 +125,9 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
         _ingredients[index] = ingredient.copyWith(name: trimmedName);
       });
     }
-
-    editController.dispose();
+    // Note: editController is not manually disposed here because the dialog
+    // manages its own lifecycle. Manual disposal can cause race conditions
+    // with ongoing animations.
   }
 
   /// Removes an ingredient from the local ingredients list.
