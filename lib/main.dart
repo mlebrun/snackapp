@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'widgets/recipe_details_panel.dart';
 
 /// Represents an ingredient within a recipe.
 class Ingredient {
@@ -144,6 +145,28 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _recipes[recipeIndex].ingredients.removeAt(ingredientIndex);
     });
+  }
+
+  /// Opens the recipe details panel for editing a recipe.
+  ///
+  /// Shows a modal bottom sheet with the RecipeDetailsPanel widget,
+  /// allowing the user to edit the recipe title, in-stock status,
+  /// and ingredients.
+  void _openRecipeDetails(BuildContext context, int recipeIndex) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => RecipeDetailsPanel(
+        recipe: _recipes[recipeIndex],
+        onSave: (updatedRecipe) {
+          setState(() {
+            _recipes[recipeIndex] = updatedRecipe;
+          });
+          Navigator.pop(context);
+        },
+        onCancel: () => Navigator.pop(context),
+      ),
+    );
   }
 
   @override
