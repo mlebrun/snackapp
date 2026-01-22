@@ -159,6 +159,13 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  /// Clears all grocery items from the list.
+  void _clearAllGroceryItems() {
+    setState(() {
+      _groceryItems.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
