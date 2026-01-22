@@ -123,7 +123,6 @@ class _GroceryFormDialogState extends State<GroceryFormDialog> {
               decoration: const InputDecoration(
                 labelText: 'Item Name',
                 hintText: 'Enter item name',
-                border: OutlineInputBorder(),
               ),
               validator: _validateName,
               onFieldSubmitted: (_) => _handleSave(),
@@ -135,7 +134,6 @@ class _GroceryFormDialogState extends State<GroceryFormDialog> {
               decoration: const InputDecoration(
                 labelText: 'Quantity (optional)',
                 hintText: 'e.g., 2 lbs, 1 dozen',
-                border: OutlineInputBorder(),
               ),
               onFieldSubmitted: (_) => _handleSave(),
             ),
