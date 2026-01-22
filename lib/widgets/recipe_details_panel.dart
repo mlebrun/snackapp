@@ -157,19 +157,27 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
     widget.onCancel();
   }
 
+  /// Dismisses the keyboard by unfocusing any active text field.
+  void _dismissKeyboard() {
+    FocusScope.of(context).unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
     // Calculate bottom padding for keyboard
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
-    return Container(
-      padding: EdgeInsets.only(
-        left: 16.0,
-        right: 16.0,
-        top: 16.0,
-        bottom: 16.0 + bottomPadding,
-      ),
-      child: Column(
+    return GestureDetector(
+      onTap: _dismissKeyboard,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          top: 16.0,
+          bottom: 16.0 + bottomPadding,
+        ),
+        child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -199,6 +207,8 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                   // Recipe name text field
                   TextField(
                     controller: _titleController,
+                    maxLines: 1,
+                    textInputAction: TextInputAction.done,
                     decoration: const InputDecoration(
                       labelText: 'Recipe Name',
                       border: OutlineInputBorder(),
@@ -252,7 +262,11 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                           size: 8,
                           color: Colors.grey,
                         ),
-                        title: Text(_ingredients[index].name),
+                        title: Text(
+                          _ingredients[index].name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -286,6 +300,8 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                       Expanded(
                         child: TextField(
                           controller: _ingredientController,
+                          maxLines: 1,
+                          textInputAction: TextInputAction.done,
                           decoration: const InputDecoration(
                             hintText: 'Add ingredient',
                             border: OutlineInputBorder(),
@@ -329,6 +345,7 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
             ],
           ),
         ],
+      ),
       ),
     );
   }
