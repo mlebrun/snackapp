@@ -91,25 +91,55 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
     }
   }
 
-  /// Shows a dialog to edit an ingredient's name.
+  /// Shows a dialog to edit an ingredient's name and quantity.
   ///
   /// The [index] parameter is the index of the ingredient in the list.
   Future<void> _editIngredient(int index) async {
     final ingredient = _ingredients[index];
-    final editController = TextEditingController(text: ingredient.name);
+    final nameController = TextEditingController(text: ingredient.name);
+    final quantityController =
+        TextEditingController(text: ingredient.quantity ?? '');
 
-    final newName = await showDialog<String>(
+    final result = await showDialog<Map<String, String>>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Edit Ingredient'),
-        content: TextField(
-          controller: editController,
-          autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Ingredient Name',
-            border: OutlineInputBorder(),
-          ),
-          onSubmitted: (value) => Navigator.of(context).pop(value),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Name field (required)
+            TextField(
+              controller: nameController,
+              autofocus: true,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: const InputDecoration(
+                labelText: 'Ingredient Name',
+                border: OutlineInputBorder(),
+              ),
+              onSubmitted: (_) {
+                Navigator.of(context).pop({
+                  'name': nameController.text,
+                  'quantity': quantityController.text,
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            // Quantity field (optional)
+            TextField(
+              controller: quantityController,
+              decoration: const InputDecoration(
+                labelText: 'Quantity (optional)',
+                hintText: 'e.g., 2 lbs, 1 dozen',
+                border: OutlineInputBorder(),
+              ),
+              onSubmitted: (_) {
+                Navigator.of(context).pop({
+                  'name': nameController.text,
+                  'quantity': quantityController.text,
+                });
+              },
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -117,21 +147,30 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(editController.text),
+            onPressed: () => Navigator.of(context).pop({
+              'name': nameController.text,
+              'quantity': quantityController.text,
+            }),
             child: const Text('Save'),
           ),
         ],
       ),
     );
 
-    // Update ingredient if a new name was provided
-    final trimmedName = newName?.trim();
-    if (trimmedName != null && trimmedName.isNotEmpty) {
-      setState(() {
-        _ingredients[index] = ingredient.copyWith(name: trimmedName);
-      });
+    // Update ingredient if a valid result was provided
+    if (result != null) {
+      final trimmedName = result['name']?.trim();
+      final trimmedQuantity = result['quantity']?.trim();
+      if (trimmedName != null && trimmedName.isNotEmpty) {
+        setState(() {
+          _ingredients[index] = ingredient.copyWith(
+            name: trimmedName,
+            quantity: trimmedQuantity?.isNotEmpty == true ? trimmedQuantity : null,
+          );
+        });
+      }
     }
-    // Note: editController is not manually disposed here because the dialog
+    // Note: Controllers are not manually disposed here because the dialog
     // manages its own lifecycle. Manual disposal can cause race conditions
     // with ongoing animations.
   }
