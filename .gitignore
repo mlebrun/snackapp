@@ -44,13 +44,14 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Auto Claude data directory
-.auto-claude/
+# Git Worktrees (parallel builds)
+.worktrees/
 
-# Auto Claude generated files
+# Auto Claude Generated
+.auto-claude/
+.planning/
+.auto-build-security.json
 .auto-claude-security.json
 .auto-claude-status
 .claude_settings.json
-.worktrees/
-.security-key
-logs/security/
+.update-metadata.json
