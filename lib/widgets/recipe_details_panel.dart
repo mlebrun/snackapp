@@ -36,6 +36,9 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
   /// Controller for the recipe title text field.
   late TextEditingController _titleController;
 
+  /// Controller for the add ingredient text field.
+  late TextEditingController _ingredientController;
+
   /// Local state for the in-stock status.
   late bool _isInStock;
 
@@ -47,6 +50,7 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
     super.initState();
     // Initialize local state from the recipe
     _titleController = TextEditingController(text: widget.recipe.name);
+    _ingredientController = TextEditingController();
     _isInStock = widget.recipe.isInStock;
     _ingredients = List.from(widget.recipe.ingredients);
   }
@@ -54,7 +58,19 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
   @override
   void dispose() {
     _titleController.dispose();
+    _ingredientController.dispose();
     super.dispose();
+  }
+
+  /// Adds an ingredient to the local ingredients list.
+  void _addIngredient() {
+    final trimmedName = _ingredientController.text.trim();
+    if (trimmedName.isNotEmpty) {
+      setState(() {
+        _ingredients.add(Ingredient.create(name: trimmedName));
+      });
+      _ingredientController.clear();
+    }
   }
 
   /// Builds the updated recipe from the current local state.
@@ -149,7 +165,7 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                   ),
                   const SizedBox(height: 8),
 
-                  // Ingredients list placeholder - will be implemented in subsequent subtasks
+                  // Ingredients list
                   if (_ingredients.isEmpty)
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -174,6 +190,35 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                         title: Text(_ingredients[index].name),
                       ),
                     ),
+                  const SizedBox(height: 8),
+
+                  // Add ingredient input row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _ingredientController,
+                          decoration: const InputDecoration(
+                            hintText: 'Add ingredient',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12.0,
+                              vertical: 10.0,
+                            ),
+                          ),
+                          onSubmitted: (_) => _addIngredient(),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed: _addIngredient,
+                        icon: const Icon(Icons.add_circle),
+                        tooltip: 'Add ingredient',
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
