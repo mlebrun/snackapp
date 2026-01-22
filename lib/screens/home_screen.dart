@@ -166,6 +166,44 @@ class _HomeScreenState extends State<HomeScreen>
     });
   }
 
+  /// Shows a confirmation dialog for clearing all grocery items.
+  ///
+  /// Returns true if the user confirms the action, false otherwise.
+  /// If confirmed, clears all items and shows a success snackbar.
+  Future<void> _showClearAllDialog() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear All Items'),
+        content: const Text(
+          'Are you sure you want to clear all items from your grocery list? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Clear All'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      _clearAllGroceryItems();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('All items cleared'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
