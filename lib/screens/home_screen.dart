@@ -20,7 +20,37 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
+  /// Controller for managing tab selection.
+  late TabController _tabController;
+
+  /// Index of the currently selected tab.
+  int _currentTabIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_handleTabChange);
+  }
+
+  @override
+  void dispose() {
+    _tabController.removeListener(_handleTabChange);
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  /// Handles tab changes to track the currently selected tab.
+  void _handleTabChange() {
+    if (!_tabController.indexIsChanging) {
+      setState(() {
+        _currentTabIndex = _tabController.index;
+      });
+    }
+  }
+
   /// The list of recipes.
   final List<Recipe> _recipes = [
     Recipe(
@@ -131,34 +161,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: const Text('Snack App'),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Recipes'),
-              Tab(text: 'Grocery List'),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            RecipeListScreen(
-              recipes: _recipes,
-              onAddToGroceryList: _addIngredientsToGroceryList,
-              onUpdateRecipe: _updateRecipe,
-            ),
-            GroceryListScreen(
-              items: _groceryItems,
-              onAddItem: _addGroceryItem,
-              onUpdateItem: _updateGroceryItem,
-              onDeleteItem: _deleteGroceryItem,
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Snack App'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Recipes'),
+            Tab(text: 'Grocery List'),
           ],
         ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          RecipeListScreen(
+            recipes: _recipes,
+            onAddToGroceryList: _addIngredientsToGroceryList,
+            onUpdateRecipe: _updateRecipe,
+          ),
+          GroceryListScreen(
+            items: _groceryItems,
+            onAddItem: _addGroceryItem,
+            onUpdateItem: _updateGroceryItem,
+            onDeleteItem: _deleteGroceryItem,
+          ),
+        ],
       ),
     );
   }
