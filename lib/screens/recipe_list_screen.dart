@@ -54,31 +54,33 @@ class RecipeListScreen extends StatelessWidget {
   }
 
   /// Builds the empty state widget shown when there are no recipes.
-  Widget _buildEmptyState() {
-    return const Center(
+  Widget _buildEmptyState(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.restaurant_menu,
             size: 64,
-            color: Colors.grey,
+            color: colorScheme.outline,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             'No recipes yet',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.grey,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             'Recipes will appear here',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -134,7 +136,10 @@ class RecipeListScreen extends StatelessWidget {
               tooltip: 'Add ingredients to grocery list',
               onPressed: () => onAddToGroceryList(recipe),
             ),
-            const Icon(Icons.chevron_right),
+            Icon(
+              Icons.chevron_right,
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ],
         ),
         onTap: () => _openRecipeDetails(context, recipe),
@@ -145,7 +150,7 @@ class RecipeListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (recipes.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context);
     }
 
     // Create sorted copy for display - In Stock recipes appear before Out of Stock
