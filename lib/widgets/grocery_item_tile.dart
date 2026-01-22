@@ -39,14 +39,14 @@ class GroceryItemTile extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
           decoration: item.isChecked ? TextDecoration.lineThrough : null,
-          color: item.isChecked ? Colors.grey : null,
+          color: item.isChecked ? Theme.of(context).colorScheme.outline : null,
         ),
       ),
       subtitle: item.quantity != null && item.quantity!.isNotEmpty
           ? Text(
               item.quantity!,
               style: TextStyle(
-                color: Colors.grey[600],
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 12,
               ),
             )
@@ -59,9 +59,9 @@ class GroceryItemTile extends StatelessWidget {
             tooltip: 'Delete item',
             onPressed: onDelete,
           ),
-          const Icon(
+          Icon(
             Icons.chevron_right,
-            color: Colors.grey,
+            color: Theme.of(context).colorScheme.outline,
           ),
         ],
       ),
