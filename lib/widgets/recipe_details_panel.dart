@@ -73,6 +73,50 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
     }
   }
 
+  /// Shows a dialog to edit an ingredient's name.
+  ///
+  /// The [index] parameter is the index of the ingredient in the list.
+  Future<void> _editIngredient(int index) async {
+    final ingredient = _ingredients[index];
+    final editController = TextEditingController(text: ingredient.name);
+
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Ingredient'),
+        content: TextField(
+          controller: editController,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Ingredient Name',
+            border: OutlineInputBorder(),
+          ),
+          onSubmitted: (value) => Navigator.of(context).pop(value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(editController.text),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    // Update ingredient if a new name was provided
+    final trimmedName = newName?.trim();
+    if (trimmedName != null && trimmedName.isNotEmpty) {
+      setState(() {
+        _ingredients[index] = ingredient.copyWith(name: trimmedName);
+      });
+    }
+
+    editController.dispose();
+  }
+
   /// Builds the updated recipe from the current local state.
   Recipe _buildUpdatedRecipe() {
     return widget.recipe.copyWith(
@@ -188,6 +232,12 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                           color: Colors.grey,
                         ),
                         title: Text(_ingredients[index].name),
+                        trailing: const Icon(
+                          Icons.edit,
+                          size: 18,
+                          color: Colors.grey,
+                        ),
+                        onTap: () => _editIngredient(index),
                       ),
                     ),
                   const SizedBox(height: 8),
