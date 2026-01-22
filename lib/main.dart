@@ -5,22 +5,25 @@ import 'screens/home_screen.dart';
 class Ingredient {
   final String id;
   final String name;
+  final String? quantity;
 
-  Ingredient({required this.id, required this.name});
+  Ingredient({required this.id, required this.name, this.quantity});
 
   /// Creates a new Ingredient with a unique ID.
-  factory Ingredient.create({required String name}) {
+  factory Ingredient.create({required String name, String? quantity}) {
     return Ingredient(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: name,
+      quantity: quantity,
     );
   }
 
   /// Creates a copy of this Ingredient with the given fields replaced.
-  Ingredient copyWith({String? id, String? name}) {
+  Ingredient copyWith({String? id, String? name, String? quantity}) {
     return Ingredient(
       id: id ?? this.id,
       name: name ?? this.name,
+      quantity: quantity ?? this.quantity,
     );
   }
 }

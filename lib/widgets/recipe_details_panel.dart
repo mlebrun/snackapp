@@ -39,6 +39,9 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
   /// Controller for the add ingredient text field.
   late TextEditingController _ingredientController;
 
+  /// Controller for the add ingredient quantity text field.
+  late TextEditingController _ingredientQuantityController;
+
   /// Focus node for the add ingredient text field.
   late FocusNode _ingredientFocusNode;
 
@@ -54,6 +57,7 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
     // Initialize local state from the recipe
     _titleController = TextEditingController(text: widget.recipe.name);
     _ingredientController = TextEditingController();
+    _ingredientQuantityController = TextEditingController();
     _ingredientFocusNode = FocusNode();
     _isInStock = widget.recipe.isInStock;
     _ingredients = List.from(widget.recipe.ingredients);
@@ -72,6 +76,7 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
     _titleController.removeListener(_onTitleChanged);
     _titleController.dispose();
     _ingredientController.dispose();
+    _ingredientQuantityController.dispose();
     _ingredientFocusNode.dispose();
     super.dispose();
   }
@@ -80,36 +85,74 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
   bool get _isTitleValid => _titleController.text.trim().isNotEmpty;
 
   /// Adds an ingredient to the local ingredients list.
+  ///
+  /// Uses the name from [_ingredientController] and optional quantity from
+  /// [_ingredientQuantityController]. Clears both fields after adding.
   void _addIngredient() {
     final trimmedName = _ingredientController.text.trim();
+    final trimmedQuantity = _ingredientQuantityController.text.trim();
     if (trimmedName.isNotEmpty) {
       setState(() {
-        _ingredients.add(Ingredient.create(name: trimmedName));
+        _ingredients.add(Ingredient.create(
+          name: trimmedName,
+          quantity: trimmedQuantity.isNotEmpty ? trimmedQuantity : null,
+        ));
       });
       _ingredientController.clear();
+      _ingredientQuantityController.clear();
       _ingredientFocusNode.requestFocus();
     }
   }
 
-  /// Shows a dialog to edit an ingredient's name.
+  /// Shows a dialog to edit an ingredient's name and quantity.
   ///
   /// The [index] parameter is the index of the ingredient in the list.
   Future<void> _editIngredient(int index) async {
     final ingredient = _ingredients[index];
-    final editController = TextEditingController(text: ingredient.name);
+    final nameController = TextEditingController(text: ingredient.name);
+    final quantityController =
+        TextEditingController(text: ingredient.quantity ?? '');
 
-    final newName = await showDialog<String>(
+    final result = await showDialog<Map<String, String>>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Edit Ingredient'),
-        content: TextField(
-          controller: editController,
-          autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Ingredient Name',
-            border: OutlineInputBorder(),
-          ),
-          onSubmitted: (value) => Navigator.of(context).pop(value),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Name field (required)
+            TextField(
+              controller: nameController,
+              autofocus: true,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: const InputDecoration(
+                labelText: 'Ingredient Name',
+                border: OutlineInputBorder(),
+              ),
+              onSubmitted: (_) {
+                Navigator.of(context).pop({
+                  'name': nameController.text,
+                  'quantity': quantityController.text,
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            // Quantity field (optional)
+            TextField(
+              controller: quantityController,
+              decoration: const InputDecoration(
+                labelText: 'Quantity (optional)',
+                hintText: 'e.g., 2 lbs, 1 dozen',
+                border: OutlineInputBorder(),
+              ),
+              onSubmitted: (_) {
+                Navigator.of(context).pop({
+                  'name': nameController.text,
+                  'quantity': quantityController.text,
+                });
+              },
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -117,21 +160,30 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(editController.text),
+            onPressed: () => Navigator.of(context).pop({
+              'name': nameController.text,
+              'quantity': quantityController.text,
+            }),
             child: const Text('Save'),
           ),
         ],
       ),
     );
 
-    // Update ingredient if a new name was provided
-    final trimmedName = newName?.trim();
-    if (trimmedName != null && trimmedName.isNotEmpty) {
-      setState(() {
-        _ingredients[index] = ingredient.copyWith(name: trimmedName);
-      });
+    // Update ingredient if a valid result was provided
+    if (result != null) {
+      final trimmedName = result['name']?.trim();
+      final trimmedQuantity = result['quantity']?.trim();
+      if (trimmedName != null && trimmedName.isNotEmpty) {
+        setState(() {
+          _ingredients[index] = ingredient.copyWith(
+            name: trimmedName,
+            quantity: trimmedQuantity?.isNotEmpty == true ? trimmedQuantity : null,
+          );
+        });
+      }
     }
-    // Note: editController is not manually disposed here because the dialog
+    // Note: Controllers are not manually disposed here because the dialog
     // manages its own lifecycle. Manual disposal can cause race conditions
     // with ongoing animations.
   }
@@ -262,42 +314,55 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                   else
                     ...List.generate(
                       _ingredients.length,
-                      (index) => ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(
-                          Icons.circle,
-                          size: 8,
-                          color: Colors.grey,
-                        ),
-                        title: Text(
-                          _ingredients[index].name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.edit,
-                                size: 18,
-                                color: Colors.grey,
+                      (index) {
+                        final ingredient = _ingredients[index];
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(
+                            Icons.circle,
+                            size: 8,
+                            color: Colors.grey,
+                          ),
+                          title: Text(
+                            ingredient.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: ingredient.quantity != null &&
+                                  ingredient.quantity!.isNotEmpty
+                              ? Text(
+                                  ingredient.quantity!,
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
+                                  ),
+                                )
+                              : null,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.edit,
+                                  size: 18,
+                                  color: Colors.grey,
+                                ),
+                                tooltip: 'Edit ingredient',
+                                onPressed: () => _editIngredient(index),
                               ),
-                              tooltip: 'Edit ingredient',
-                              onPressed: () => _editIngredient(index),
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.remove_circle_outline,
-                                color: Colors.redAccent,
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.remove_circle_outline,
+                                  color: Colors.redAccent,
+                                ),
+                                tooltip: 'Remove ingredient',
+                                onPressed: () => _removeIngredient(index),
                               ),
-                              tooltip: 'Remove ingredient',
-                              onPressed: () => _removeIngredient(index),
-                            ),
-                          ],
-                        ),
-                        onTap: () => _editIngredient(index),
-                      ),
+                            ],
+                          ),
+                          onTap: () => _editIngredient(index),
+                        );
+                      },
                     ),
                   const SizedBox(height: 8),
 
@@ -305,13 +370,33 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                   Row(
                     children: [
                       Expanded(
+                        flex: 2,
                         child: TextField(
                           controller: _ingredientController,
                           focusNode: _ingredientFocusNode,
                           maxLines: 1,
-                          textInputAction: TextInputAction.done,
+                          textInputAction: TextInputAction.next,
                           decoration: const InputDecoration(
                             hintText: 'Add ingredient',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12.0,
+                              vertical: 10.0,
+                            ),
+                          ),
+                          onSubmitted: (_) => _addIngredient(),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: 1,
+                        child: TextField(
+                          controller: _ingredientQuantityController,
+                          maxLines: 1,
+                          textInputAction: TextInputAction.done,
+                          decoration: const InputDecoration(
+                            hintText: 'Qty (optional)',
                             border: OutlineInputBorder(),
                             isDense: true,
                             contentPadding: EdgeInsets.symmetric(
