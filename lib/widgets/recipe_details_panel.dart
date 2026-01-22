@@ -262,42 +262,55 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                   else
                     ...List.generate(
                       _ingredients.length,
-                      (index) => ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(
-                          Icons.circle,
-                          size: 8,
-                          color: Colors.grey,
-                        ),
-                        title: Text(
-                          _ingredients[index].name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.edit,
-                                size: 18,
-                                color: Colors.grey,
+                      (index) {
+                        final ingredient = _ingredients[index];
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(
+                            Icons.circle,
+                            size: 8,
+                            color: Colors.grey,
+                          ),
+                          title: Text(
+                            ingredient.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: ingredient.quantity != null &&
+                                  ingredient.quantity!.isNotEmpty
+                              ? Text(
+                                  ingredient.quantity!,
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
+                                  ),
+                                )
+                              : null,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.edit,
+                                  size: 18,
+                                  color: Colors.grey,
+                                ),
+                                tooltip: 'Edit ingredient',
+                                onPressed: () => _editIngredient(index),
                               ),
-                              tooltip: 'Edit ingredient',
-                              onPressed: () => _editIngredient(index),
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.remove_circle_outline,
-                                color: Colors.redAccent,
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.remove_circle_outline,
+                                  color: Colors.redAccent,
+                                ),
+                                tooltip: 'Remove ingredient',
+                                onPressed: () => _removeIngredient(index),
                               ),
-                              tooltip: 'Remove ingredient',
-                              onPressed: () => _removeIngredient(index),
-                            ),
-                          ],
-                        ),
-                        onTap: () => _editIngredient(index),
-                      ),
+                            ],
+                          ),
+                          onTap: () => _editIngredient(index),
+                        );
+                      },
                     ),
                   const SizedBox(height: 8),
 
