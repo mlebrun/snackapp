@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'widgets/recipe_details_panel.dart';
+import 'screens/home_screen.dart';
 
 /// Represents an ingredient within a recipe.
 class Ingredient {
@@ -67,158 +67,21 @@ void main() {
   runApp(const MyApp());
 }
 
+/// The root widget of the Snack App.
+///
+/// Configures the app-wide theme using Material Design 3 with a deep purple
+/// color scheme and sets up [HomeScreen] as the home page.
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Snack Recipes',
+      title: 'Snack App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Snack Recipes'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  final List<Recipe> _recipes = [];
-  final TextEditingController _textController = TextEditingController();
-  final FocusNode _recipeFocusNode = FocusNode();
-
-  void _addRecipe() {
-    final text = _textController.text.trim();
-    if (text.isNotEmpty) {
-      setState(() {
-        _recipes.add(Recipe.create(name: text));
-      });
-      _textController.clear();
-      _recipeFocusNode.requestFocus();
-    }
-  }
-
-  void _removeRecipe(int index) {
-    setState(() {
-      _recipes.removeAt(index);
-    });
-  }
-
-  /// Opens the recipe details panel for editing a recipe.
-  ///
-  /// Shows a modal bottom sheet with the RecipeDetailsPanel widget,
-  /// allowing the user to edit the recipe title, in-stock status,
-  /// and ingredients.
-  void _openRecipeDetails(BuildContext context, int recipeIndex) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => RecipeDetailsPanel(
-        recipe: _recipes[recipeIndex],
-        onSave: (updatedRecipe) {
-          setState(() {
-            _recipes[recipeIndex] = updatedRecipe;
-          });
-          Navigator.pop(context);
-        },
-        onCancel: () => Navigator.pop(context),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    _recipeFocusNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: _recipes.isEmpty
-                ? const Center(
-                    child: Text('No recipes yet. Add one below!'),
-                  )
-                : ListView.builder(
-                    itemCount: _recipes.length,
-                    itemBuilder: (context, index) {
-                      final recipe = _recipes[index];
-                      return ListTile(
-                        onTap: () => _openRecipeDetails(context, index),
-                        title: Opacity(
-                          opacity: recipe.isInStock ? 1.0 : 0.5,
-                          child: Text(recipe.name),
-                        ),
-                        subtitle: Text(
-                          recipe.ingredients.isEmpty
-                              ? 'No ingredients'
-                              : '${recipe.ingredients.length} ingredient${recipe.ingredients.length == 1 ? '' : 's'}',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                          ),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              tooltip: 'Delete recipe',
-                              onPressed: () => _removeRecipe(index),
-                            ),
-                            const Icon(
-                              Icons.chevron_right,
-                              color: Colors.grey,
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _textController,
-                    focusNode: _recipeFocusNode,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter recipe name',
-                      border: OutlineInputBorder(),
-                    ),
-                    onSubmitted: (_) => _addRecipe(),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton.filled(
-                  onPressed: _addRecipe,
-                  icon: const Icon(Icons.add),
-                  tooltip: 'Add recipe',
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      home: const HomeScreen(),
     );
   }
 }
