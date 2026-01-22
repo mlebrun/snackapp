@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../models/grocery_item.dart';
+import '../widgets/recipe_details_panel.dart';
 import 'recipe_list_screen.dart';
 import 'grocery_list_screen.dart';
 
@@ -126,6 +127,36 @@ class _HomeScreenState extends State<HomeScreen>
     });
   }
 
+  /// Opens the recipe details panel to add a new recipe.
+  ///
+  /// Creates a new empty recipe and opens it in the RecipeDetailsPanel.
+  /// When saved, adds the recipe to the list.
+  void _addRecipe() {
+    final newRecipe = Recipe.create(name: '');
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.7,
+          child: RecipeDetailsPanel(
+            recipe: newRecipe,
+            onSave: (savedRecipe) {
+              setState(() {
+                _recipes.add(savedRecipe);
+              });
+              Navigator.of(context).pop();
+            },
+            onCancel: () => Navigator.of(context).pop(),
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Adds a grocery item to the list.
   void _addGroceryItem(GroceryItem item) {
     setState(() {
@@ -238,6 +269,7 @@ class _HomeScreenState extends State<HomeScreen>
         children: [
           RecipeListScreen(
             recipes: _recipes,
+            onAddRecipe: _addRecipe,
             onAddToGroceryList: _addIngredientsToGroceryList,
             onUpdateRecipe: _updateRecipe,
           ),
