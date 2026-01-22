@@ -270,7 +270,6 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                     textInputAction: TextInputAction.done,
                     decoration: const InputDecoration(
                       labelText: 'Recipe Name',
-                      border: OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -301,13 +300,13 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
 
                   // Ingredients list
                   if (_ingredients.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Text(
                         'No ingredients yet. Add one below!',
                         style: TextStyle(
                           fontStyle: FontStyle.italic,
-                          color: Colors.grey,
+                          color: Theme.of(context).colorScheme.outline,
                         ),
                       ),
                     )
@@ -378,7 +377,6 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                           textInputAction: TextInputAction.next,
                           decoration: const InputDecoration(
                             hintText: 'Add ingredient',
-                            border: OutlineInputBorder(),
                             isDense: true,
                             contentPadding: EdgeInsets.symmetric(
                               horizontal: 12.0,

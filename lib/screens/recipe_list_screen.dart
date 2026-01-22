@@ -54,31 +54,33 @@ class RecipeListScreen extends StatelessWidget {
   }
 
   /// Builds the empty state widget shown when there are no recipes.
-  Widget _buildEmptyState() {
-    return const Center(
+  Widget _buildEmptyState(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.restaurant_menu,
             size: 64,
-            color: Colors.grey,
+            color: colorScheme.outline,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             'No recipes yet',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.grey,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             'Recipes will appear here',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -88,12 +90,19 @@ class RecipeListScreen extends StatelessWidget {
 
   /// Builds a list tile for a recipe.
   Widget _buildRecipeTile(BuildContext context, Recipe recipe) {
+    // Use color-blind friendly colors with higher contrast:
+    // - Teal (shade700) for "In Stock" - distinguishable from red/orange for color-blind users
+    // - Deep Orange (shade800) for "Out of Stock" - distinguishable from green/teal for color-blind users
+    final inStockColor = Colors.teal.shade700;
+    final outOfStockColor = Colors.deepOrange.shade800;
+    final statusColor = recipe.isInStock ? inStockColor : outOfStockColor;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
         leading: Icon(
           Icons.restaurant,
-          color: recipe.isInStock ? Colors.green : Colors.red,
+          color: statusColor,
         ),
         title: Text(
           recipe.name,
@@ -105,16 +114,14 @@ class RecipeListScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: recipe.isInStock
-                    ? Colors.green.withAlpha(25)
-                    : Colors.red.withAlpha(25),
+                color: statusColor.withAlpha(25),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 recipe.isInStock ? 'In Stock' : 'Out of Stock',
                 style: TextStyle(
                   fontSize: 12,
-                  color: recipe.isInStock ? Colors.green : Colors.red,
+                  color: statusColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -134,7 +141,10 @@ class RecipeListScreen extends StatelessWidget {
               tooltip: 'Add ingredients to grocery list',
               onPressed: () => onAddToGroceryList(recipe),
             ),
-            const Icon(Icons.chevron_right),
+            Icon(
+              Icons.chevron_right,
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ],
         ),
         onTap: () => _openRecipeDetails(context, recipe),
@@ -145,7 +155,7 @@ class RecipeListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (recipes.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context);
     }
 
     // Create sorted copy for display - In Stock recipes appear before Out of Stock
