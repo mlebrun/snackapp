@@ -210,6 +210,15 @@ class _HomeScreenState extends State<HomeScreen>
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Snack App'),
+        actions: _currentTabIndex == 1
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.delete_sweep),
+                  tooltip: 'Clear all items',
+                  onPressed: _groceryItems.isEmpty ? null : _showClearAllDialog,
+                ),
+              ]
+            : null,
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
