@@ -45,6 +45,21 @@ class Recipe {
       name: name,
     );
   }
+
+  /// Creates a copy of this Recipe with the given fields replaced.
+  Recipe copyWith({
+    String? id,
+    String? name,
+    List<Ingredient>? ingredients,
+    bool? isInStock,
+  }) {
+    return Recipe(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      ingredients: ingredients ?? List.from(this.ingredients),
+      isInStock: isInStock ?? this.isInStock,
+    );
+  }
 }
 
 void main() {
