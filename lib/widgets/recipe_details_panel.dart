@@ -117,6 +117,15 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
     editController.dispose();
   }
 
+  /// Removes an ingredient from the local ingredients list.
+  ///
+  /// The [index] parameter is the index of the ingredient to remove.
+  void _removeIngredient(int index) {
+    setState(() {
+      _ingredients.removeAt(index);
+    });
+  }
+
   /// Builds the updated recipe from the current local state.
   Recipe _buildUpdatedRecipe() {
     return widget.recipe.copyWith(
@@ -232,10 +241,27 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                           color: Colors.grey,
                         ),
                         title: Text(_ingredients[index].name),
-                        trailing: const Icon(
-                          Icons.edit,
-                          size: 18,
-                          color: Colors.grey,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.edit,
+                                size: 18,
+                                color: Colors.grey,
+                              ),
+                              tooltip: 'Edit ingredient',
+                              onPressed: () => _editIngredient(index),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.remove_circle_outline,
+                                color: Colors.redAccent,
+                              ),
+                              tooltip: 'Remove ingredient',
+                              onPressed: () => _removeIngredient(index),
+                            ),
+                          ],
                         ),
                         onTap: () => _editIngredient(index),
                       ),
