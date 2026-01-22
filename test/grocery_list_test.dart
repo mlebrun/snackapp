@@ -396,8 +396,8 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(const MyApp());
 
-      // Verify we start on Recipes tab (shows placeholder)
-      expect(find.text('Coming Soon'), findsOneWidget);
+      // Verify we start on Recipes tab (shows recipe list)
+      expect(find.text('Spaghetti Carbonara'), findsOneWidget);
 
       // Navigate to Grocery List tab
       await tester.tap(find.text('Grocery List'));
@@ -405,14 +405,14 @@ void main() {
 
       // Verify we're on Grocery List tab
       expect(find.text('No grocery items yet'), findsOneWidget);
-      expect(find.text('Coming Soon'), findsNothing);
+      expect(find.text('Spaghetti Carbonara'), findsNothing);
 
       // Navigate back to Recipes tab
       await tester.tap(find.text('Recipes'));
       await tester.pumpAndSettle();
 
       // Verify we're back on Recipes tab
-      expect(find.text('Coming Soon'), findsOneWidget);
+      expect(find.text('Spaghetti Carbonara'), findsOneWidget);
       expect(find.text('No grocery items yet'), findsNothing);
     });
 
@@ -440,8 +440,8 @@ void main() {
       await tester.tap(find.text('Recipes'));
       await tester.pumpAndSettle();
 
-      // Verify Recipes tab shows placeholder
-      expect(find.text('Coming Soon'), findsOneWidget);
+      // Verify Recipes tab shows recipes
+      expect(find.text('Spaghetti Carbonara'), findsOneWidget);
 
       // Navigate back to Grocery List tab
       await tester.tap(find.text('Grocery List'));

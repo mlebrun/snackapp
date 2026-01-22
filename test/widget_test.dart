@@ -16,22 +16,40 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(const MyApp());
 
-      // Verify Recipes tab is shown (placeholder content)
-      expect(find.text('Coming Soon'), findsOneWidget);
-      expect(
-          find.text('Recipe list feature is under development'), findsOneWidget);
+      // Verify Recipes tab shows recipes (not Coming Soon)
+      expect(find.text('Spaghetti Carbonara'), findsOneWidget);
+      expect(find.text('Chicken Stir Fry'), findsOneWidget);
+      expect(find.text('Greek Salad'), findsOneWidget);
     });
   });
 
-  group('Recipe list placeholder', () {
-    testWidgets('Shows coming soon message', (WidgetTester tester) async {
+  group('Recipe list display', () {
+    testWidgets('Shows recipe list with stock status',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const MyApp());
 
-      // Verify placeholder UI elements
-      expect(find.byIcon(Icons.restaurant_menu), findsOneWidget);
-      expect(find.text('Coming Soon'), findsOneWidget);
-      expect(
-          find.text('Recipe list feature is under development'), findsOneWidget);
+      // Verify recipe names are displayed
+      expect(find.text('Spaghetti Carbonara'), findsOneWidget);
+      expect(find.text('Chicken Stir Fry'), findsOneWidget);
+      expect(find.text('Greek Salad'), findsOneWidget);
+
+      // Verify stock status indicators are displayed
+      expect(find.text('In Stock'), findsNWidgets(2)); // 2 recipes in stock
+      expect(find.text('Out of Stock'), findsOneWidget); // 1 recipe out of stock
+    });
+
+    testWidgets('Shows add to cart buttons', (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Verify add to cart icons are displayed (one per recipe)
+      expect(find.byIcon(Icons.add_shopping_cart), findsNWidgets(3));
+    });
+
+    testWidgets('Shows ingredient count', (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Verify ingredient count is displayed
+      expect(find.text('4 ingredients'), findsNWidgets(3)); // All have 4 ingredients
     });
   });
 
@@ -40,7 +58,7 @@ void main() {
       await tester.pumpWidget(const MyApp());
 
       // Verify we start on Recipes tab
-      expect(find.text('Coming Soon'), findsOneWidget);
+      expect(find.text('Spaghetti Carbonara'), findsOneWidget);
 
       // Navigate to Grocery List tab
       await tester.tap(find.text('Grocery List'));
@@ -48,14 +66,14 @@ void main() {
 
       // Verify we're on Grocery List tab (empty state)
       expect(find.text('No grocery items yet'), findsOneWidget);
-      expect(find.text('Coming Soon'), findsNothing);
+      expect(find.text('Spaghetti Carbonara'), findsNothing);
 
       // Navigate back to Recipes tab
       await tester.tap(find.text('Recipes'));
       await tester.pumpAndSettle();
 
       // Verify we're back on Recipes tab
-      expect(find.text('Coming Soon'), findsOneWidget);
+      expect(find.text('Spaghetti Carbonara'), findsOneWidget);
       expect(find.text('No grocery items yet'), findsNothing);
     });
 
@@ -65,6 +83,30 @@ void main() {
       // Verify both tabs are in the tab bar
       expect(find.widgetWithText(Tab, 'Recipes'), findsOneWidget);
       expect(find.widgetWithText(Tab, 'Grocery List'), findsOneWidget);
+    });
+  });
+
+  group('Add ingredients to grocery list', () {
+    testWidgets('Can add recipe ingredients to grocery list',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Tap add to cart on first recipe (Spaghetti Carbonara)
+      await tester.tap(find.byIcon(Icons.add_shopping_cart).first);
+      await tester.pumpAndSettle();
+
+      // Verify snackbar shows confirmation
+      expect(find.text('Added 4 ingredients to grocery list'), findsOneWidget);
+
+      // Navigate to Grocery List tab
+      await tester.tap(find.text('Grocery List'));
+      await tester.pumpAndSettle();
+
+      // Verify ingredients were added
+      expect(find.text('Spaghetti'), findsOneWidget);
+      expect(find.text('Eggs'), findsOneWidget);
+      expect(find.text('Parmesan Cheese'), findsOneWidget);
+      expect(find.text('Bacon'), findsOneWidget);
     });
   });
 

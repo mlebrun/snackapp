@@ -10,32 +10,39 @@ import '../widgets/grocery_form_dialog.dart';
 /// - Add new items via a floating action button
 /// - Edit existing items by tapping on them
 /// - Delete items using the delete button on each tile
-class GroceryListScreen extends StatefulWidget {
+///
+/// Note: This screen is designed to be used within a TabBarView and does not
+/// include its own AppBar since the parent HomeScreen provides one.
+class GroceryListScreen extends StatelessWidget {
   /// Creates a GroceryListScreen.
-  const GroceryListScreen({super.key});
+  const GroceryListScreen({
+    super.key,
+    required this.items,
+    required this.onAddItem,
+    required this.onUpdateItem,
+    required this.onDeleteItem,
+  });
 
-  @override
-  State<GroceryListScreen> createState() => _GroceryListScreenState();
-}
+  /// The list of grocery items to display.
+  final List<GroceryItem> items;
 
-class _GroceryListScreenState extends State<GroceryListScreen>
-    with AutomaticKeepAliveClientMixin {
-  /// The list of grocery items.
-  final List<GroceryItem> _items = [];
+  /// Callback when a new item is added.
+  final void Function(GroceryItem item) onAddItem;
 
-  @override
-  bool get wantKeepAlive => true;
+  /// Callback when an item is updated.
+  final void Function(int index, GroceryItem item) onUpdateItem;
+
+  /// Callback when an item is deleted.
+  final void Function(int index) onDeleteItem;
 
   /// Adds a new grocery item to the list.
   ///
   /// Opens the [GroceryFormDialog] in add mode and adds the returned
   /// item to the list if the user saves.
-  Future<void> _addItem() async {
+  Future<void> _addItem(BuildContext context) async {
     final newItem = await GroceryFormDialog.show(context);
     if (newItem != null) {
-      setState(() {
-        _items.add(newItem);
-      });
+      onAddItem(newItem);
     }
   }
 
@@ -43,42 +50,14 @@ class _GroceryListScreenState extends State<GroceryListScreen>
   ///
   /// Opens the [GroceryFormDialog] in edit mode with the item's current
   /// values pre-filled. Updates the item in the list if the user saves.
-  Future<void> _editItem(int index) async {
+  Future<void> _editItem(BuildContext context, int index) async {
     final updatedItem = await GroceryFormDialog.show(
       context,
-      item: _items[index],
+      item: items[index],
     );
     if (updatedItem != null) {
-      setState(() {
-        _items[index] = updatedItem;
-      });
+      onUpdateItem(index, updatedItem);
     }
-  }
-
-  /// Deletes a grocery item from the list.
-  ///
-  /// Removes the item at the given index and shows a snackbar with
-  /// an undo option.
-  void _deleteItem(int index) {
-    final deletedItem = _items[index];
-    setState(() {
-      _items.removeAt(index);
-    });
-
-    // Show undo snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${deletedItem.name} deleted'),
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () {
-            setState(() {
-              _items.insert(index, deletedItem);
-            });
-          },
-        ),
-      ),
-    );
   }
 
   /// Builds the empty state widget shown when there are no items.
@@ -115,15 +94,15 @@ class _GroceryListScreenState extends State<GroceryListScreen>
   }
 
   /// Builds the list view of grocery items.
-  Widget _buildListView() {
+  Widget _buildListView(BuildContext context) {
     return ListView.builder(
-      itemCount: _items.length,
+      itemCount: items.length,
       itemBuilder: (context, index) {
-        final item = _items[index];
+        final item = items[index];
         return GroceryItemTile(
           item: item,
-          onTap: () => _editItem(index),
-          onDelete: () => _deleteItem(index),
+          onTap: () => _editItem(context, index),
+          onDelete: () => onDeleteItem(index),
         );
       },
     );
@@ -131,15 +110,12 @@ class _GroceryListScreenState extends State<GroceryListScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Required for AutomaticKeepAliveClientMixin
-    super.build(context);
-
     // Note: This screen is designed to be used within a TabBarView and does not
     // include its own AppBar since the parent HomeScreen provides one.
     return Scaffold(
-      body: _items.isEmpty ? _buildEmptyState() : _buildListView(),
+      body: items.isEmpty ? _buildEmptyState() : _buildListView(context),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addItem,
+        onPressed: () => _addItem(context),
         tooltip: 'Add item',
         child: const Icon(Icons.add),
       ),
