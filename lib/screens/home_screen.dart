@@ -100,7 +100,10 @@ class _HomeScreenState extends State<HomeScreen>
           (item) => item.name.toLowerCase() == ingredient.name.toLowerCase(),
         );
         if (!existsInList) {
-          _groceryItems.add(GroceryItem.create(name: ingredient.name));
+          _groceryItems.add(GroceryItem.create(
+            name: ingredient.name,
+            quantity: ingredient.quantity,
+          ));
         }
       }
     });
