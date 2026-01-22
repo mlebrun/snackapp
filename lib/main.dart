@@ -14,6 +14,14 @@ class Ingredient {
       name: name,
     );
   }
+
+  /// Creates a copy of this Ingredient with the given fields replaced.
+  Ingredient copyWith({String? id, String? name}) {
+    return Ingredient(
+      id: id ?? this.id,
+      name: name ?? this.name,
+    );
+  }
 }
 
 /// Represents a recipe containing a list of ingredients.
