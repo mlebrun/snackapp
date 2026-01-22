@@ -94,6 +94,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final List<Recipe> _recipes = [];
   final TextEditingController _textController = TextEditingController();
+  final FocusNode _recipeFocusNode = FocusNode();
 
   void _addRecipe() {
     final text = _textController.text.trim();
@@ -102,6 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
         _recipes.add(Recipe.create(name: text));
       });
       _textController.clear();
+      _recipeFocusNode.requestFocus();
     }
   }
 
@@ -136,6 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void dispose() {
     _textController.dispose();
+    _recipeFocusNode.dispose();
     super.dispose();
   }
 
@@ -197,6 +200,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Expanded(
                   child: TextField(
                     controller: _textController,
+                    focusNode: _recipeFocusNode,
                     decoration: const InputDecoration(
                       hintText: 'Enter recipe name',
                       border: OutlineInputBorder(),
