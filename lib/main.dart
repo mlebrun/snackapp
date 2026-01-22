@@ -94,15 +94,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final List<Recipe> _recipes = [];
   final TextEditingController _textController = TextEditingController();
-  final Map<String, TextEditingController> _ingredientControllers = {};
-
-  /// Gets or creates a TextEditingController for a recipe's ingredient input.
-  TextEditingController _getIngredientController(String recipeId) {
-    return _ingredientControllers.putIfAbsent(
-      recipeId,
-      () => TextEditingController(),
-    );
-  }
 
   void _addRecipe() {
     final text = _textController.text.trim();
@@ -115,35 +106,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _removeRecipe(int index) {
-    final recipeId = _recipes[index].id;
     setState(() {
       _recipes.removeAt(index);
-    });
-    // Clean up the ingredient controller for this recipe
-    _ingredientControllers[recipeId]?.dispose();
-    _ingredientControllers.remove(recipeId);
-  }
-
-  void _toggleStockStatus(int index) {
-    setState(() {
-      _recipes[index].isInStock = !_recipes[index].isInStock;
-    });
-  }
-
-  void _addIngredient(int recipeIndex, String name) {
-    final trimmedName = name.trim();
-    if (trimmedName.isNotEmpty) {
-      setState(() {
-        _recipes[recipeIndex].ingredients.add(
-          Ingredient.create(name: trimmedName),
-        );
-      });
-    }
-  }
-
-  void _removeIngredient(int recipeIndex, int ingredientIndex) {
-    setState(() {
-      _recipes[recipeIndex].ingredients.removeAt(ingredientIndex);
     });
   }
 
@@ -172,10 +136,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void dispose() {
     _textController.dispose();
-    for (final controller in _ingredientControllers.values) {
-      controller.dispose();
-    }
-    _ingredientControllers.clear();
     super.dispose();
   }
 
