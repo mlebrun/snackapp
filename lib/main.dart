@@ -76,7 +76,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = ColorScheme.fromSeed(seedColor: Colors.green.shade600);
+    final colorScheme = ColorScheme.fromSeed(seedColor: Colors.green.shade800);
 
     return MaterialApp(
       title: 'Snack App',

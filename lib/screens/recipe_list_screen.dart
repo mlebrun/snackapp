@@ -90,12 +90,19 @@ class RecipeListScreen extends StatelessWidget {
 
   /// Builds a list tile for a recipe.
   Widget _buildRecipeTile(BuildContext context, Recipe recipe) {
+    // Use color-blind friendly colors with higher contrast:
+    // - Teal (shade700) for "In Stock" - distinguishable from red/orange for color-blind users
+    // - Deep Orange (shade800) for "Out of Stock" - distinguishable from green/teal for color-blind users
+    final inStockColor = Colors.teal.shade700;
+    final outOfStockColor = Colors.deepOrange.shade800;
+    final statusColor = recipe.isInStock ? inStockColor : outOfStockColor;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
         leading: Icon(
           Icons.restaurant,
-          color: recipe.isInStock ? Colors.green : Colors.red,
+          color: statusColor,
         ),
         title: Text(
           recipe.name,
@@ -107,16 +114,14 @@ class RecipeListScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: recipe.isInStock
-                    ? Colors.green.withAlpha(25)
-                    : Colors.red.withAlpha(25),
+                color: statusColor.withAlpha(25),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 recipe.isInStock ? 'In Stock' : 'Out of Stock',
                 style: TextStyle(
                   fontSize: 12,
-                  color: recipe.isInStock ? Colors.green : Colors.red,
+                  color: statusColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
