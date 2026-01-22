@@ -39,6 +39,9 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
   /// Controller for the add ingredient text field.
   late TextEditingController _ingredientController;
 
+  /// Focus node for the add ingredient text field.
+  late FocusNode _ingredientFocusNode;
+
   /// Local state for the in-stock status.
   late bool _isInStock;
 
@@ -51,6 +54,7 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
     // Initialize local state from the recipe
     _titleController = TextEditingController(text: widget.recipe.name);
     _ingredientController = TextEditingController();
+    _ingredientFocusNode = FocusNode();
     _isInStock = widget.recipe.isInStock;
     _ingredients = List.from(widget.recipe.ingredients);
 
@@ -68,6 +72,7 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
     _titleController.removeListener(_onTitleChanged);
     _titleController.dispose();
     _ingredientController.dispose();
+    _ingredientFocusNode.dispose();
     super.dispose();
   }
 
@@ -82,6 +87,7 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
         _ingredients.add(Ingredient.create(name: trimmedName));
       });
       _ingredientController.clear();
+      _ingredientFocusNode.requestFocus();
     }
   }
 
@@ -301,6 +307,7 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                       Expanded(
                         child: TextField(
                           controller: _ingredientController,
+                          focusNode: _ingredientFocusNode,
                           maxLines: 1,
                           textInputAction: TextInputAction.done,
                           decoration: const InputDecoration(
