@@ -535,4 +535,242 @@ void main() {
       expect(find.byIcon(Icons.delete), findsOneWidget);
     });
   });
+
+  group('Recipe ingredient quantity', () {
+    /// Helper function to open the first recipe's details panel.
+    Future<void> openFirstRecipeDetails(WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+      // Tap the first recipe card (Spaghetti Carbonara)
+      await tester.tap(find.text('Spaghetti Carbonara'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Recipe details panel shows ingredient quantity field',
+        (WidgetTester tester) async {
+      await openFirstRecipeDetails(tester);
+
+      // Verify we're in the recipe details panel
+      expect(find.text('Edit Recipe'), findsOneWidget);
+
+      // The add ingredient input should have a quantity hint field
+      expect(find.text('Qty (optional)'), findsOneWidget);
+    });
+
+    testWidgets('Can add ingredient with quantity in recipe details',
+        (WidgetTester tester) async {
+      await openFirstRecipeDetails(tester);
+
+      // Find the add ingredient input fields
+      final addIngredientField = find.widgetWithText(TextField, 'Add ingredient');
+      final addQuantityField = find.widgetWithText(TextField, 'Qty (optional)');
+
+      // Enter ingredient name and quantity
+      await tester.enterText(addIngredientField, 'Olive Oil');
+      await tester.pump();
+      await tester.enterText(addQuantityField, '2 tbsp');
+      await tester.pump();
+
+      // Tap the add button
+      await tester.tap(find.byIcon(Icons.add_circle));
+      await tester.pumpAndSettle();
+
+      // Verify the ingredient was added with quantity
+      expect(find.text('Olive Oil'), findsOneWidget);
+      expect(find.text('2 tbsp'), findsOneWidget);
+    });
+
+    testWidgets('Ingredient edit dialog shows quantity field',
+        (WidgetTester tester) async {
+      await openFirstRecipeDetails(tester);
+
+      // Tap on an existing ingredient to edit it (Spaghetti)
+      await tester.tap(find.text('Spaghetti'));
+      await tester.pumpAndSettle();
+
+      // Verify edit dialog shows with quantity field
+      expect(find.text('Edit Ingredient'), findsOneWidget);
+      expect(find.text('Ingredient Name'), findsOneWidget);
+      expect(find.text('Quantity (optional)'), findsOneWidget);
+    });
+
+    testWidgets('Can edit ingredient quantity in recipe details',
+        (WidgetTester tester) async {
+      await openFirstRecipeDetails(tester);
+
+      // Tap on an ingredient to edit
+      await tester.tap(find.text('Spaghetti'));
+      await tester.pumpAndSettle();
+
+      // Find the quantity field in the dialog and enter a quantity
+      final quantityField = find.widgetWithText(TextField, 'Quantity (optional)');
+      await tester.enterText(quantityField.first, '1 lb');
+      await tester.pump();
+
+      // Save the changes
+      await tester.tap(find.widgetWithText(TextButton, 'Save'));
+      await tester.pumpAndSettle();
+
+      // Verify quantity is now shown for the ingredient
+      expect(find.text('1 lb'), findsOneWidget);
+    });
+
+    testWidgets('Ingredient quantity displays in recipe details list',
+        (WidgetTester tester) async {
+      await openFirstRecipeDetails(tester);
+
+      // Add an ingredient with quantity first
+      final addIngredientField = find.widgetWithText(TextField, 'Add ingredient');
+      final addQuantityField = find.widgetWithText(TextField, 'Qty (optional)');
+
+      await tester.enterText(addIngredientField, 'Black Pepper');
+      await tester.pump();
+      await tester.enterText(addQuantityField, '1 tsp');
+      await tester.pump();
+
+      await tester.tap(find.byIcon(Icons.add_circle));
+      await tester.pumpAndSettle();
+
+      // Verify quantity is shown in the ingredient list
+      expect(find.text('Black Pepper'), findsOneWidget);
+      expect(find.text('1 tsp'), findsOneWidget);
+    });
+  });
+
+  group('Recipe to Grocery List quantity transfer', () {
+    /// Helper to add quantity to an ingredient in recipe details and save.
+    Future<void> addQuantityToIngredient(
+      WidgetTester tester,
+      String ingredientName,
+      String quantity,
+    ) async {
+      // Tap the ingredient to open edit dialog
+      await tester.tap(find.text(ingredientName));
+      await tester.pumpAndSettle();
+
+      // Enter quantity
+      final quantityField = find.widgetWithText(TextField, 'Quantity (optional)');
+      await tester.enterText(quantityField.first, quantity);
+      await tester.pump();
+
+      // Save
+      await tester.tap(find.widgetWithText(TextButton, 'Save'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Quantity transfers from recipe to grocery list',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Open recipe details for Spaghetti Carbonara
+      await tester.tap(find.text('Spaghetti Carbonara'));
+      await tester.pumpAndSettle();
+
+      // Add quantity to an ingredient
+      await addQuantityToIngredient(tester, 'Spaghetti', '500g');
+
+      // Save recipe changes
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
+      await tester.pumpAndSettle();
+
+      // Now tap the add to grocery list button
+      await tester.tap(find.byIcon(Icons.add_shopping_cart).first);
+      await tester.pumpAndSettle();
+
+      // Navigate to grocery list tab
+      await tester.tap(find.text('Grocery List'));
+      await tester.pumpAndSettle();
+
+      // Verify Spaghetti was added with its quantity
+      expect(find.text('Spaghetti'), findsOneWidget);
+      expect(find.text('500g'), findsOneWidget);
+    });
+
+    testWidgets('Ingredients without quantity transfer without quantity',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Tap add to grocery list directly without editing quantities
+      await tester.tap(find.byIcon(Icons.add_shopping_cart).first);
+      await tester.pumpAndSettle();
+
+      // Navigate to grocery list tab
+      await tester.tap(find.text('Grocery List'));
+      await tester.pumpAndSettle();
+
+      // Verify ingredients were added (without quantities since none were set)
+      expect(find.text('Spaghetti'), findsOneWidget);
+      expect(find.text('Eggs'), findsOneWidget);
+      expect(find.text('Parmesan Cheese'), findsOneWidget);
+      expect(find.text('Bacon'), findsOneWidget);
+    });
+
+    testWidgets('Existing ingredients without quantity transfer without quantity',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Add default recipe ingredients (which have no quantity) to grocery list
+      await tester.tap(find.byIcon(Icons.add_shopping_cart).first);
+      await tester.pumpAndSettle();
+
+      // Navigate to grocery list
+      await tester.tap(find.text('Grocery List'));
+      await tester.pumpAndSettle();
+
+      // Verify all 4 default ingredients were added without quantities
+      // (the sample recipes don't have quantities by default)
+      expect(find.text('Spaghetti'), findsOneWidget);
+      expect(find.text('Eggs'), findsOneWidget);
+      expect(find.text('Parmesan Cheese'), findsOneWidget);
+      expect(find.text('Bacon'), findsOneWidget);
+    });
+
+    testWidgets('Snackbar shows when ingredients added to grocery list',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Add ingredients to grocery list
+      await tester.tap(find.byIcon(Icons.add_shopping_cart).first);
+      await tester.pump();
+
+      // Verify snackbar message
+      expect(find.text('Added 4 ingredients to grocery list'), findsOneWidget);
+    });
+
+    testWidgets('Duplicate ingredients are not added again',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Add ingredients to grocery list for the first time
+      await tester.tap(find.byIcon(Icons.add_shopping_cart).first);
+      await tester.pumpAndSettle();
+
+      // Navigate to grocery list and verify count
+      await tester.tap(find.text('Grocery List'));
+      await tester.pumpAndSettle();
+
+      // Should have 4 items
+      expect(find.text('Spaghetti'), findsOneWidget);
+      expect(find.text('Eggs'), findsOneWidget);
+      expect(find.text('Parmesan Cheese'), findsOneWidget);
+      expect(find.text('Bacon'), findsOneWidget);
+
+      // Navigate back to recipes
+      await tester.tap(find.text('Recipes'));
+      await tester.pumpAndSettle();
+
+      // Try to add same ingredients again
+      await tester.tap(find.byIcon(Icons.add_shopping_cart).first);
+      await tester.pumpAndSettle();
+
+      // Navigate to grocery list
+      await tester.tap(find.text('Grocery List'));
+      await tester.pumpAndSettle();
+
+      // Should still have only 4 items (no duplicates)
+      expect(find.text('Spaghetti'), findsOneWidget);
+      expect(find.text('Eggs'), findsOneWidget);
+      expect(find.text('Parmesan Cheese'), findsOneWidget);
+      expect(find.text('Bacon'), findsOneWidget);
+    });
+  });
 }
