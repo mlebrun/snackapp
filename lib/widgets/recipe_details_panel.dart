@@ -39,6 +39,9 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
   /// Controller for the add ingredient text field.
   late TextEditingController _ingredientController;
 
+  /// Controller for the add ingredient quantity text field.
+  late TextEditingController _ingredientQuantityController;
+
   /// Focus node for the add ingredient text field.
   late FocusNode _ingredientFocusNode;
 
@@ -54,6 +57,7 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
     // Initialize local state from the recipe
     _titleController = TextEditingController(text: widget.recipe.name);
     _ingredientController = TextEditingController();
+    _ingredientQuantityController = TextEditingController();
     _ingredientFocusNode = FocusNode();
     _isInStock = widget.recipe.isInStock;
     _ingredients = List.from(widget.recipe.ingredients);
@@ -72,6 +76,7 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
     _titleController.removeListener(_onTitleChanged);
     _titleController.dispose();
     _ingredientController.dispose();
+    _ingredientQuantityController.dispose();
     _ingredientFocusNode.dispose();
     super.dispose();
   }
@@ -80,13 +85,21 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
   bool get _isTitleValid => _titleController.text.trim().isNotEmpty;
 
   /// Adds an ingredient to the local ingredients list.
+  ///
+  /// Uses the name from [_ingredientController] and optional quantity from
+  /// [_ingredientQuantityController]. Clears both fields after adding.
   void _addIngredient() {
     final trimmedName = _ingredientController.text.trim();
+    final trimmedQuantity = _ingredientQuantityController.text.trim();
     if (trimmedName.isNotEmpty) {
       setState(() {
-        _ingredients.add(Ingredient.create(name: trimmedName));
+        _ingredients.add(Ingredient.create(
+          name: trimmedName,
+          quantity: trimmedQuantity.isNotEmpty ? trimmedQuantity : null,
+        ));
       });
       _ingredientController.clear();
+      _ingredientQuantityController.clear();
       _ingredientFocusNode.requestFocus();
     }
   }
@@ -357,13 +370,33 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                   Row(
                     children: [
                       Expanded(
+                        flex: 2,
                         child: TextField(
                           controller: _ingredientController,
                           focusNode: _ingredientFocusNode,
                           maxLines: 1,
-                          textInputAction: TextInputAction.done,
+                          textInputAction: TextInputAction.next,
                           decoration: const InputDecoration(
                             hintText: 'Add ingredient',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12.0,
+                              vertical: 10.0,
+                            ),
+                          ),
+                          onSubmitted: (_) => _addIngredient(),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: 1,
+                        child: TextField(
+                          controller: _ingredientQuantityController,
+                          maxLines: 1,
+                          textInputAction: TextInputAction.done,
+                          decoration: const InputDecoration(
+                            hintText: 'Qty (optional)',
                             border: OutlineInputBorder(),
                             isDense: true,
                             contentPadding: EdgeInsets.symmetric(
