@@ -53,14 +53,26 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
     _ingredientController = TextEditingController();
     _isInStock = widget.recipe.isInStock;
     _ingredients = List.from(widget.recipe.ingredients);
+
+    // Listen to title changes to update save button state
+    _titleController.addListener(_onTitleChanged);
+  }
+
+  /// Called when the title text changes to trigger a rebuild.
+  void _onTitleChanged() {
+    setState(() {});
   }
 
   @override
   void dispose() {
+    _titleController.removeListener(_onTitleChanged);
     _titleController.dispose();
     _ingredientController.dispose();
     super.dispose();
   }
+
+  /// Returns true if the title is valid (not empty after trimming).
+  bool get _isTitleValid => _titleController.text.trim().isNotEmpty;
 
   /// Adds an ingredient to the local ingredients list.
   void _addIngredient() {
@@ -311,7 +323,7 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
               ),
               const SizedBox(width: 8),
               ElevatedButton(
-                onPressed: _handleSave,
+                onPressed: _isTitleValid ? _handleSave : null,
                 child: const Text('Save'),
               ),
             ],
