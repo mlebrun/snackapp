@@ -107,7 +107,6 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
           autofocus: true,
           decoration: const InputDecoration(
             labelText: 'Ingredient Name',
-            border: OutlineInputBorder(),
           ),
           onSubmitted: (value) => Navigator.of(context).pop(value),
         ),
@@ -218,7 +217,6 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                     textInputAction: TextInputAction.done,
                     decoration: const InputDecoration(
                       labelText: 'Recipe Name',
-                      border: OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -249,13 +247,13 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
 
                   // Ingredients list
                   if (_ingredients.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Text(
                         'No ingredients yet. Add one below!',
                         style: TextStyle(
                           fontStyle: FontStyle.italic,
-                          color: Colors.grey,
+                          color: Theme.of(context).colorScheme.outline,
                         ),
                       ),
                     )
@@ -264,10 +262,10 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                       _ingredients.length,
                       (index) => ListTile(
                         contentPadding: EdgeInsets.zero,
-                        leading: const Icon(
+                        leading: Icon(
                           Icons.circle,
                           size: 8,
-                          color: Colors.grey,
+                          color: Theme.of(context).colorScheme.outline,
                         ),
                         title: Text(
                           _ingredients[index].name,
@@ -278,18 +276,18 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.edit,
                                 size: 18,
-                                color: Colors.grey,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                               tooltip: 'Edit ingredient',
                               onPressed: () => _editIngredient(index),
                             ),
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.remove_circle_outline,
-                                color: Colors.redAccent,
+                                color: Theme.of(context).colorScheme.error,
                               ),
                               tooltip: 'Remove ingredient',
                               onPressed: () => _removeIngredient(index),
@@ -312,7 +310,6 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                           textInputAction: TextInputAction.done,
                           decoration: const InputDecoration(
                             hintText: 'Add ingredient',
-                            border: OutlineInputBorder(),
                             isDense: true,
                             contentPadding: EdgeInsets.symmetric(
                               horizontal: 12.0,
