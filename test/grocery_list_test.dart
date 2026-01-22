@@ -338,14 +338,18 @@ void main() {
 
       // Delete the item
       await tester.tap(find.byIcon(Icons.delete));
-      await tester.pump();
+      await tester.pump(); // Allow setState to process
+      await tester.pump(const Duration(milliseconds: 100)); // Allow snackbar to appear
 
       // Verify item is deleted
       expect(find.text('Undo Test Item'), findsNothing);
 
+      // Verify snackbar is showing with Undo option
+      expect(find.text('Undo'), findsOneWidget);
+
       // Tap Undo
       await tester.tap(find.text('Undo'));
-      await tester.pump();
+      await tester.pump(); // Allow setState to process
 
       // Verify item is restored
       expect(find.text('Undo Test Item'), findsOneWidget);
@@ -392,8 +396,8 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(const MyApp());
 
-      // Verify we start on Recipes tab (default)
-      expect(find.text('No recipes yet. Add one below!'), findsOneWidget);
+      // Verify we start on Recipes tab (shows placeholder)
+      expect(find.text('Coming Soon'), findsOneWidget);
 
       // Navigate to Grocery List tab
       await tester.tap(find.text('Grocery List'));
@@ -401,28 +405,20 @@ void main() {
 
       // Verify we're on Grocery List tab
       expect(find.text('No grocery items yet'), findsOneWidget);
-      expect(find.text('No recipes yet. Add one below!'), findsNothing);
+      expect(find.text('Coming Soon'), findsNothing);
 
       // Navigate back to Recipes tab
       await tester.tap(find.text('Recipes'));
       await tester.pumpAndSettle();
 
       // Verify we're back on Recipes tab
-      expect(find.text('No recipes yet. Add one below!'), findsOneWidget);
+      expect(find.text('Coming Soon'), findsOneWidget);
       expect(find.text('No grocery items yet'), findsNothing);
     });
 
-    testWidgets('Each tab maintains its own state',
+    testWidgets('Grocery list tab maintains state across tab switches',
         (WidgetTester tester) async {
       await tester.pumpWidget(const MyApp());
-
-      // Add a recipe on Recipes tab
-      await tester.enterText(find.byType(TextField), 'Test Recipe');
-      await tester.tap(find.byIcon(Icons.add));
-      await tester.pump();
-
-      // Verify recipe was added
-      expect(find.text('Test Recipe'), findsOneWidget);
 
       // Navigate to Grocery List tab
       await tester.tap(find.text('Grocery List'));
@@ -440,12 +436,12 @@ void main() {
       // Verify grocery item was added
       expect(find.text('Test Grocery'), findsOneWidget);
 
-      // Navigate back to Recipes tab
+      // Navigate to Recipes tab
       await tester.tap(find.text('Recipes'));
       await tester.pumpAndSettle();
 
-      // Verify recipe still exists
-      expect(find.text('Test Recipe'), findsOneWidget);
+      // Verify Recipes tab shows placeholder
+      expect(find.text('Coming Soon'), findsOneWidget);
 
       // Navigate back to Grocery List tab
       await tester.tap(find.text('Grocery List'));
@@ -474,9 +470,9 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(const MyApp());
 
-      // Verify both tab labels are visible
-      expect(find.text('Recipes'), findsOneWidget);
-      expect(find.text('Grocery List'), findsOneWidget);
+      // Verify both tabs are in the tab bar
+      expect(find.widgetWithText(Tab, 'Recipes'), findsOneWidget);
+      expect(find.widgetWithText(Tab, 'Grocery List'), findsOneWidget);
     });
   });
 

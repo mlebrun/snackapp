@@ -18,9 +18,13 @@ class GroceryListScreen extends StatefulWidget {
   State<GroceryListScreen> createState() => _GroceryListScreenState();
 }
 
-class _GroceryListScreenState extends State<GroceryListScreen> {
+class _GroceryListScreenState extends State<GroceryListScreen>
+    with AutomaticKeepAliveClientMixin {
   /// The list of grocery items.
   final List<GroceryItem> _items = [];
+
+  @override
+  bool get wantKeepAlive => true;
 
   /// Adds a new grocery item to the list.
   ///
@@ -127,11 +131,12 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Required for AutomaticKeepAliveClientMixin
+    super.build(context);
+
+    // Note: This screen is designed to be used within a TabBarView and does not
+    // include its own AppBar since the parent HomeScreen provides one.
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Grocery List'),
-      ),
       body: _items.isEmpty ? _buildEmptyState() : _buildListView(),
       floatingActionButton: FloatingActionButton(
         onPressed: _addItem,
