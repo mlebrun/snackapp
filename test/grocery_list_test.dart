@@ -11,6 +11,15 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// Helper function to find a TextFormField by its label text.
+  /// This finds the TextFormField that is an ancestor of the label Text widget.
+  Finder findTextFormFieldByLabel(String label) {
+    return find.ancestor(
+      of: find.text(label),
+      matching: find.byType(TextFormField),
+    );
+  }
+
   group('Grocery List empty state', () {
     testWidgets('Shows empty state when no items exist',
         (WidgetTester tester) async {
@@ -47,12 +56,7 @@ void main() {
       expect(find.text('Add Item'), findsOneWidget);
 
       // Enter item name in the text field with label 'Item Name'
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            (widget.decoration?.labelText == 'Item Name' ||
-                widget.decoration?.hintText == 'Enter item name'),
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
       await tester.enterText(nameField.first, 'Milk');
       await tester.pump();
 
@@ -73,20 +77,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter item name
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Item Name',
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
       await tester.enterText(nameField.first, 'Eggs');
       await tester.pump();
 
       // Enter quantity
-      final quantityField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Quantity (optional)',
-      );
+      final quantityField = findTextFormFieldByLabel('Quantity (optional)');
       await tester.enterText(quantityField.first, '1 dozen');
       await tester.pump();
 
@@ -106,11 +102,7 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Item Name',
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
       await tester.enterText(nameField.first, 'Bread');
       await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
       await tester.pumpAndSettle();
@@ -137,11 +129,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter item name
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Item Name',
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
       await tester.enterText(nameField.first, 'Cancelled Item');
       await tester.pump();
 
@@ -183,11 +171,7 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Item Name',
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
       await tester.enterText(nameField.first, 'Cheese');
       await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
       await tester.pumpAndSettle();
@@ -209,11 +193,7 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Item Name',
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
       await tester.enterText(nameField.first, 'Original Name');
       await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
       await tester.pumpAndSettle();
@@ -242,16 +222,8 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Item Name',
-      );
-      final quantityField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Quantity (optional)',
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
+      final quantityField = findTextFormFieldByLabel('Quantity (optional)');
 
       await tester.enterText(nameField.first, 'Sugar');
       await tester.enterText(quantityField.first, '2 lbs');
@@ -282,11 +254,7 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Item Name',
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
       await tester.enterText(nameField.first, 'Keep This');
       await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
       await tester.pumpAndSettle();
@@ -317,11 +285,7 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Item Name',
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
       await tester.enterText(nameField.first, 'Item to delete');
       await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
       await tester.pumpAndSettle();
@@ -346,11 +310,7 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Item Name',
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
       await tester.enterText(nameField.first, 'Snackbar Test');
       await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
       await tester.pumpAndSettle();
@@ -371,11 +331,7 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Item Name',
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
       await tester.enterText(nameField.first, 'Undo Test Item');
       await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
       await tester.pumpAndSettle();
@@ -404,11 +360,7 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Item Name',
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
       await tester.enterText(nameField.first, 'Item One');
       await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
       await tester.pumpAndSettle();
@@ -480,11 +432,7 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Item Name',
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
       await tester.enterText(nameField.first, 'Test Grocery');
       await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
       await tester.pumpAndSettle();
@@ -542,11 +490,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter whitespace-only name
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Item Name',
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
       await tester.enterText(nameField.first, '   ');
       await tester.pump();
 
@@ -570,11 +514,7 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Item Name',
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
       await tester.enterText(nameField.first, 'Test Item');
       await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
       await tester.pumpAndSettle();
@@ -590,11 +530,7 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      final nameField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextFormField &&
-            widget.decoration?.labelText == 'Item Name',
-      );
+      final nameField = findTextFormFieldByLabel('Item Name');
       await tester.enterText(nameField.first, 'Delete Icon Test');
       await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
       await tester.pumpAndSettle();
