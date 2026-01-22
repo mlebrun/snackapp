@@ -61,31 +61,33 @@ class GroceryListScreen extends StatelessWidget {
   }
 
   /// Builds the empty state widget shown when there are no items.
-  Widget _buildEmptyState() {
-    return const Center(
+  Widget _buildEmptyState(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.shopping_cart_outlined,
             size: 64,
-            color: Colors.grey,
+            color: colorScheme.outline,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             'No grocery items yet',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.grey,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             'Tap + to add one!',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -113,7 +115,7 @@ class GroceryListScreen extends StatelessWidget {
     // Note: This screen is designed to be used within a TabBarView and does not
     // include its own AppBar since the parent HomeScreen provides one.
     return Scaffold(
-      body: items.isEmpty ? _buildEmptyState() : _buildListView(context),
+      body: items.isEmpty ? _buildEmptyState(context) : _buildListView(context),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _addItem(context),
         tooltip: 'Add item',
