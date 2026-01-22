@@ -164,4 +164,223 @@ void main() {
       expect(original.isInStock, isFalse); // Original unchanged
     });
   });
+
+  group('Clear All button', () {
+    testWidgets('Clear All button is not visible on Recipes tab',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Verify we're on Recipes tab
+      expect(find.text('Spaghetti Carbonara'), findsOneWidget);
+
+      // Clear All button should not be visible on Recipes tab
+      expect(find.byIcon(Icons.delete_sweep), findsNothing);
+    });
+
+    testWidgets('Clear All button is visible on Grocery List tab',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Navigate to Grocery List tab
+      await tester.tap(find.text('Grocery List'));
+      await tester.pumpAndSettle();
+
+      // Clear All button should be visible
+      expect(find.byIcon(Icons.delete_sweep), findsOneWidget);
+    });
+
+    testWidgets('Clear All button is disabled when grocery list is empty',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Navigate to Grocery List tab (empty by default)
+      await tester.tap(find.text('Grocery List'));
+      await tester.pumpAndSettle();
+
+      // Verify list is empty
+      expect(find.text('No grocery items yet'), findsOneWidget);
+
+      // Find the IconButton and verify it's disabled
+      final iconButton = tester.widget<IconButton>(
+        find.widgetWithIcon(IconButton, Icons.delete_sweep),
+      );
+      expect(iconButton.onPressed, isNull);
+    });
+
+    testWidgets('Clear All button is enabled when grocery list has items',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Add items to grocery list from Recipes tab
+      await tester.tap(find.byIcon(Icons.add_shopping_cart).first);
+      await tester.pumpAndSettle();
+
+      // Navigate to Grocery List tab
+      await tester.tap(find.text('Grocery List'));
+      await tester.pumpAndSettle();
+
+      // Verify items are in the list
+      expect(find.text('Spaghetti'), findsOneWidget);
+
+      // Find the IconButton and verify it's enabled
+      final iconButton = tester.widget<IconButton>(
+        find.widgetWithIcon(IconButton, Icons.delete_sweep),
+      );
+      expect(iconButton.onPressed, isNotNull);
+    });
+  });
+
+  group('Clear All confirmation dialog', () {
+    testWidgets('Tapping Clear All button shows confirmation dialog',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Add items to grocery list
+      await tester.tap(find.byIcon(Icons.add_shopping_cart).first);
+      await tester.pumpAndSettle();
+
+      // Navigate to Grocery List tab
+      await tester.tap(find.text('Grocery List'));
+      await tester.pumpAndSettle();
+
+      // Tap Clear All button
+      await tester.tap(find.byIcon(Icons.delete_sweep));
+      await tester.pumpAndSettle();
+
+      // Verify dialog appears with expected content
+      expect(find.text('Clear All Items'), findsOneWidget);
+      expect(
+        find.text(
+          'Are you sure you want to clear all items from your grocery list? This action cannot be undone.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.text('Clear All'), findsOneWidget);
+    });
+
+    testWidgets('Canceling dialog preserves grocery items',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Add items to grocery list
+      await tester.tap(find.byIcon(Icons.add_shopping_cart).first);
+      await tester.pumpAndSettle();
+
+      // Navigate to Grocery List tab
+      await tester.tap(find.text('Grocery List'));
+      await tester.pumpAndSettle();
+
+      // Verify items are present
+      expect(find.text('Spaghetti'), findsOneWidget);
+      expect(find.text('Eggs'), findsOneWidget);
+
+      // Tap Clear All button
+      await tester.tap(find.byIcon(Icons.delete_sweep));
+      await tester.pumpAndSettle();
+
+      // Tap Cancel button
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      // Verify items are still present
+      expect(find.text('Spaghetti'), findsOneWidget);
+      expect(find.text('Eggs'), findsOneWidget);
+      expect(find.text('Parmesan Cheese'), findsOneWidget);
+      expect(find.text('Bacon'), findsOneWidget);
+    });
+
+    testWidgets('Confirming dialog clears all grocery items',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Add items to grocery list
+      await tester.tap(find.byIcon(Icons.add_shopping_cart).first);
+      await tester.pumpAndSettle();
+
+      // Navigate to Grocery List tab
+      await tester.tap(find.text('Grocery List'));
+      await tester.pumpAndSettle();
+
+      // Verify items are present
+      expect(find.text('Spaghetti'), findsOneWidget);
+      expect(find.text('Eggs'), findsOneWidget);
+
+      // Tap Clear All button
+      await tester.tap(find.byIcon(Icons.delete_sweep));
+      await tester.pumpAndSettle();
+
+      // Tap Clear All in dialog to confirm
+      await tester.tap(find.text('Clear All'));
+      await tester.pumpAndSettle();
+
+      // Verify all items are cleared
+      expect(find.text('Spaghetti'), findsNothing);
+      expect(find.text('Eggs'), findsNothing);
+      expect(find.text('Parmesan Cheese'), findsNothing);
+      expect(find.text('Bacon'), findsNothing);
+
+      // Verify empty state is shown
+      expect(find.text('No grocery items yet'), findsOneWidget);
+
+      // Verify success snackbar
+      expect(find.text('All items cleared'), findsOneWidget);
+    });
+
+    testWidgets('Dismissing dialog by tapping outside preserves items',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Add items to grocery list
+      await tester.tap(find.byIcon(Icons.add_shopping_cart).first);
+      await tester.pumpAndSettle();
+
+      // Navigate to Grocery List tab
+      await tester.tap(find.text('Grocery List'));
+      await tester.pumpAndSettle();
+
+      // Tap Clear All button
+      await tester.tap(find.byIcon(Icons.delete_sweep));
+      await tester.pumpAndSettle();
+
+      // Dismiss dialog by tapping outside (on the barrier)
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+
+      // Verify items are still present
+      expect(find.text('Spaghetti'), findsOneWidget);
+      expect(find.text('Eggs'), findsOneWidget);
+    });
+
+    testWidgets('Clear All button becomes disabled after clearing',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      // Add items to grocery list
+      await tester.tap(find.byIcon(Icons.add_shopping_cart).first);
+      await tester.pumpAndSettle();
+
+      // Navigate to Grocery List tab
+      await tester.tap(find.text('Grocery List'));
+      await tester.pumpAndSettle();
+
+      // Verify button is initially enabled
+      var iconButton = tester.widget<IconButton>(
+        find.widgetWithIcon(IconButton, Icons.delete_sweep),
+      );
+      expect(iconButton.onPressed, isNotNull);
+
+      // Clear all items
+      await tester.tap(find.byIcon(Icons.delete_sweep));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Clear All'));
+      await tester.pumpAndSettle();
+
+      // Verify button is now disabled
+      iconButton = tester.widget<IconButton>(
+        find.widgetWithIcon(IconButton, Icons.delete_sweep),
+      );
+      expect(iconButton.onPressed, isNull);
+    });
+  });
 }
