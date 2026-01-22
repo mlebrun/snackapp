@@ -148,10 +148,19 @@ class RecipeListScreen extends StatelessWidget {
       return _buildEmptyState();
     }
 
+    // Create sorted copy for display - In Stock recipes appear before Out of Stock
+    final sortedRecipes = List<Recipe>.from(recipes)
+      ..sort((a, b) {
+        // In Stock (true) comes before Out of Stock (false)
+        // true = 0, false = 1, so sort ascending
+        return (a.isInStock ? 0 : 1).compareTo(b.isInStock ? 0 : 1);
+      });
+
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: recipes.length,
-      itemBuilder: (context, index) => _buildRecipeTile(context, recipes[index]),
+      itemCount: sortedRecipes.length,
+      itemBuilder: (context, index) =>
+          _buildRecipeTile(context, sortedRecipes[index]),
     );
   }
 }
