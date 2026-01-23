@@ -260,6 +260,7 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
           // Body with form fields
           Flexible(
             child: SingleChildScrollView(
+              clipBehavior: Clip.none,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
