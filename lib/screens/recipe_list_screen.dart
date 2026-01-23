@@ -6,6 +6,7 @@ import '../widgets/recipe_details_panel.dart';
 ///
 /// This screen allows users to:
 /// - View all recipes with their stock status
+/// - Add new recipes via a floating action button
 /// - Tap a recipe to view and edit its details
 /// - Add recipe ingredients to the grocery list
 ///
@@ -16,12 +17,16 @@ class RecipeListScreen extends StatelessWidget {
   const RecipeListScreen({
     super.key,
     required this.recipes,
+    required this.onAddRecipe,
     required this.onAddToGroceryList,
     required this.onUpdateRecipe,
   });
 
   /// The list of recipes to display.
   final List<Recipe> recipes;
+
+  /// Callback when user wants to add a new recipe.
+  final VoidCallback onAddRecipe;
 
   /// Callback when user wants to add ingredients to grocery list.
   final void Function(Recipe recipe) onAddToGroceryList;
@@ -77,7 +82,7 @@ class RecipeListScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Recipes will appear here',
+            'Tap + to add one!',
             style: TextStyle(
               fontSize: 14,
               color: colorScheme.onSurfaceVariant,
@@ -152,12 +157,8 @@ class RecipeListScreen extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (recipes.isEmpty) {
-      return _buildEmptyState(context);
-    }
-
+  /// Builds the list view of recipes.
+  Widget _buildListView(BuildContext context) {
     // Create sorted copy for display - In Stock recipes appear before Out of Stock
     final sortedRecipes = List<Recipe>.from(recipes)
       ..sort((a, b) {
@@ -171,6 +172,20 @@ class RecipeListScreen extends StatelessWidget {
       itemCount: sortedRecipes.length,
       itemBuilder: (context, index) =>
           _buildRecipeTile(context, sortedRecipes[index]),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Note: This screen is designed to be used within a TabBarView and does not
+    // include its own AppBar since the parent HomeScreen provides one.
+    return Scaffold(
+      body: recipes.isEmpty ? _buildEmptyState(context) : _buildListView(context),
+      floatingActionButton: FloatingActionButton(
+        onPressed: onAddRecipe,
+        tooltip: 'Add recipe',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
