@@ -115,12 +115,12 @@ class _GroceryFormDialogState extends State<GroceryFormDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Name field (required)
+            // Name field (required) - inherits InputDecorationTheme from app theme
             TextFormField(
               controller: _nameController,
               autofocus: true,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Item Name',
                 hintText: 'Enter item name',
               ),
@@ -128,10 +128,10 @@ class _GroceryFormDialogState extends State<GroceryFormDialog> {
               onFieldSubmitted: (_) => _handleSave(),
             ),
             const SizedBox(height: 16),
-            // Quantity field (optional)
+            // Quantity field (optional) - inherits InputDecorationTheme from app theme
             TextFormField(
               controller: _quantityController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Quantity (optional)',
                 hintText: 'e.g., 2 lbs, 1 dozen',
               ),

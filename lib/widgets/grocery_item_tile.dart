@@ -55,7 +55,10 @@ class GroceryItemTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: const Icon(Icons.delete),
+            icon: Icon(
+              Icons.delete,
+              color: Theme.of(context).colorScheme.error,
+            ),
             tooltip: 'Delete item',
             onPressed: onDelete,
           ),

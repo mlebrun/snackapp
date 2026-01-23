@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
+import '../utils/animation_utils.dart';
 import '../widgets/recipe_details_panel.dart';
 
 /// A screen that displays a list of recipes with in-stock/out-of-stock status.
@@ -94,20 +95,28 @@ class RecipeListScreen extends StatelessWidget {
   }
 
   /// Builds a list tile for a recipe.
-  Widget _buildRecipeTile(BuildContext context, Recipe recipe) {
-    // Use color-blind friendly colors with higher contrast:
-    // - Teal (shade700) for "In Stock" - distinguishable from red/orange for color-blind users
-    // - Deep Orange (shade800) for "Out of Stock" - distinguishable from green/teal for color-blind users
-    final inStockColor = Colors.teal.shade700;
-    final outOfStockColor = Colors.deepOrange.shade800;
-    final statusColor = recipe.isInStock ? inStockColor : outOfStockColor;
+  Widget _buildRecipeTile(BuildContext context, Recipe recipe, int index) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    // Use M3 Expressive colorScheme tokens for status colors:
+    // - primaryContainer/onPrimaryContainer for "In Stock"
+    // - errorContainer/onErrorContainer for "Out of Stock"
+    final statusBackgroundColor = recipe.isInStock
+        ? colorScheme.primaryContainer
+        : colorScheme.errorContainer;
+    final statusForegroundColor = recipe.isInStock
+        ? colorScheme.onPrimaryContainer
+        : colorScheme.onErrorContainer;
+    final iconColor = recipe.isInStock
+        ? colorScheme.primary
+        : colorScheme.error;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
         leading: Icon(
           Icons.restaurant,
-          color: statusColor,
+          color: iconColor,
         ),
         title: Text(
           recipe.name,
@@ -117,24 +126,29 @@ class RecipeListScreen extends StatelessWidget {
         subtitle: Row(
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              // Expressive pill shape with increased padding
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: statusColor.withAlpha(25),
-                borderRadius: BorderRadius.circular(12),
+                color: statusBackgroundColor,
+                // More expressive pill shape with larger radius
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
                 recipe.isInStock ? 'In Stock' : 'Out of Stock',
                 style: TextStyle(
                   fontSize: 12,
-                  color: statusColor,
-                  fontWeight: FontWeight.w500,
+                  color: statusForegroundColor,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
             const SizedBox(width: 8),
             Text(
               '${recipe.ingredients.length} ingredients',
-              style: const TextStyle(fontSize: 12),
+              style: TextStyle(
+                fontSize: 12,
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -148,13 +162,13 @@ class RecipeListScreen extends StatelessWidget {
             ),
             Icon(
               Icons.chevron_right,
-              color: Theme.of(context).colorScheme.outline,
+              color: colorScheme.outline,
             ),
           ],
         ),
         onTap: () => _openRecipeDetails(context, recipe),
       ),
-    );
+    ).animateEntrance(index: index);
   }
 
   /// Builds the list view of recipes.
@@ -171,7 +185,7 @@ class RecipeListScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: sortedRecipes.length,
       itemBuilder: (context, index) =>
-          _buildRecipeTile(context, sortedRecipes[index]),
+          _buildRecipeTile(context, sortedRecipes[index], index),
     );
   }
 

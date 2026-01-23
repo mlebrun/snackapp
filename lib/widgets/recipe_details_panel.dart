@@ -316,25 +316,26 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                       _ingredients.length,
                       (index) {
                         final ingredient = _ingredients[index];
+                        final colorScheme = Theme.of(context).colorScheme;
                         return ListTile(
                           contentPadding: EdgeInsets.zero,
-                          leading: const Icon(
+                          leading: Icon(
                             Icons.circle,
                             size: 8,
-                            color: Colors.grey,
+                            color: colorScheme.outline,
                           ),
                           title: Text(
                             ingredient.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodyLarge,
                           ),
                           subtitle: ingredient.quantity != null &&
                                   ingredient.quantity!.isNotEmpty
                               ? Text(
                                   ingredient.quantity!,
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 12,
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                 )
                               : null,
@@ -342,18 +343,18 @@ class _RecipeDetailsPanelState extends State<RecipeDetailsPanel> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: const Icon(
-                                  Icons.edit,
-                                  size: 18,
-                                  color: Colors.grey,
+                                icon: Icon(
+                                  Icons.edit_outlined,
+                                  size: 20,
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
                                 tooltip: 'Edit ingredient',
                                 onPressed: () => _editIngredient(index),
                               ),
                               IconButton(
-                                icon: const Icon(
+                                icon: Icon(
                                   Icons.remove_circle_outline,
-                                  color: Colors.redAccent,
+                                  color: colorScheme.error,
                                 ),
                                 tooltip: 'Remove ingredient',
                                 onPressed: () => _removeIngredient(index),
