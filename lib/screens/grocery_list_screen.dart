@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/grocery_item.dart';
+import '../utils/animation_utils.dart';
 import '../widgets/grocery_item_tile.dart';
 import '../widgets/grocery_form_dialog.dart';
 
@@ -98,6 +99,7 @@ class GroceryListScreen extends StatelessWidget {
   /// Builds the list view of grocery items.
   Widget _buildListView(BuildContext context) {
     return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
@@ -105,7 +107,7 @@ class GroceryListScreen extends StatelessWidget {
           item: item,
           onTap: () => _editItem(context, index),
           onDelete: () => onDeleteItem(index),
-        );
+        ).animateEntrance(index: index);
       },
     );
   }
