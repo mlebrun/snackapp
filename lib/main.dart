@@ -1,6 +1,7 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'providers/theme_provider.dart';
 import 'screens/home_screen.dart';
 
 /// Represents an ingredient within a recipe.
@@ -72,6 +73,36 @@ void main() {
   runApp(const MyApp());
 }
 
+/// Provides access to the [ThemeProvider] to descendant widgets.
+///
+/// Use [ThemeScope.of] to access the theme provider from any widget
+/// in the tree below [MyApp].
+class ThemeScope extends InheritedWidget {
+  /// Creates a ThemeScope.
+  const ThemeScope({
+    super.key,
+    required this.themeProvider,
+    required super.child,
+  });
+
+  /// The theme provider instance.
+  final ThemeProvider themeProvider;
+
+  /// Returns the [ThemeProvider] from the nearest [ThemeScope] ancestor.
+  ///
+  /// Throws an assertion error if no [ThemeScope] is found in the widget tree.
+  static ThemeProvider of(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<ThemeScope>();
+    assert(scope != null, 'No ThemeScope found in context');
+    return scope!.themeProvider;
+  }
+
+  @override
+  bool updateShouldNotify(ThemeScope oldWidget) {
+    return themeProvider != oldWidget.themeProvider;
+  }
+}
+
 /// The root widget of the Snack App.
 ///
 /// Configures the app-wide theme using Material Design 3 Expressive with
@@ -79,11 +110,36 @@ void main() {
 /// Uses [DynamicColorBuilder] to adapt to system colors on Android 12+,
 /// with a fallback to a green seed color scheme using the fidelity variant
 /// for more vibrant, emotionally resonant colors.
-class MyApp extends StatelessWidget {
+///
+/// The theme mode can be controlled by the user via the settings icon
+/// in the app bar. Theme preference is persisted across app restarts.
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  /// The theme provider that manages theme state and persistence.
+  late final ThemeProvider _themeProvider;
 
   /// Default seed color for the app theme when dynamic colors are unavailable.
   static const Color _seedColor = Colors.green;
+
+  @override
+  void initState() {
+    super.initState();
+    _themeProvider = ThemeProvider();
+    // Load the saved theme preference on startup
+    _themeProvider.loadSavedTheme();
+  }
+
+  @override
+  void dispose() {
+    _themeProvider.dispose();
+    super.dispose();
+  }
 
   /// Creates a comprehensive M3 Expressive [ThemeData] from a [ColorScheme].
   ///
@@ -238,36 +294,45 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DynamicColorBuilder(
-      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-        ColorScheme lightColorScheme;
-        ColorScheme darkColorScheme;
+    return ThemeScope(
+      themeProvider: _themeProvider,
+      child: ValueListenableBuilder<ThemeMode>(
+        valueListenable: _themeProvider.themeModeNotifier,
+        builder: (context, themeMode, child) {
+          return DynamicColorBuilder(
+            builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+              ColorScheme lightColorScheme;
+              ColorScheme darkColorScheme;
 
-        if (lightDynamic != null && darkDynamic != null) {
-          // Use dynamic colors from system (Android 12+)
-          lightColorScheme = lightDynamic.harmonized();
-          darkColorScheme = darkDynamic.harmonized();
-        } else {
-          // Fallback to seed color with fidelity variant for vibrant colors
-          lightColorScheme = ColorScheme.fromSeed(
-            seedColor: _seedColor,
-            brightness: Brightness.light,
-            dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
-          );
-          darkColorScheme = ColorScheme.fromSeed(
-            seedColor: _seedColor,
-            brightness: Brightness.dark,
-            dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
-          );
-        }
+              if (lightDynamic != null && darkDynamic != null) {
+                // Use dynamic colors from system (Android 12+)
+                lightColorScheme = lightDynamic.harmonized();
+                darkColorScheme = darkDynamic.harmonized();
+              } else {
+                // Fallback to seed color with fidelity variant for vibrant colors
+                lightColorScheme = ColorScheme.fromSeed(
+                  seedColor: _seedColor,
+                  brightness: Brightness.light,
+                  dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+                );
+                darkColorScheme = ColorScheme.fromSeed(
+                  seedColor: _seedColor,
+                  brightness: Brightness.dark,
+                  dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+                );
+              }
 
-        return MaterialApp(
-          title: 'Snack App',
-          theme: _buildTheme(lightColorScheme, Brightness.light),
-          darkTheme: _buildTheme(darkColorScheme, Brightness.dark),
-          home: const HomeScreen(),
-        );
-      },
+              return MaterialApp(
+                title: 'Snack App',
+                theme: _buildTheme(lightColorScheme, Brightness.light),
+                darkTheme: _buildTheme(darkColorScheme, Brightness.dark),
+                themeMode: themeMode,
+                home: const HomeScreen(),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
