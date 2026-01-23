@@ -70,31 +70,29 @@ class _ThemeSelectorDialogState extends State<ThemeSelectorDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Choose Theme'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          RadioListTile<ThemeMode>(
-            title: const Text('Light'),
-            subtitle: const Text('Always use light theme'),
-            value: ThemeMode.light,
-            groupValue: _selectedMode,
-            onChanged: _handleModeSelected,
-          ),
-          RadioListTile<ThemeMode>(
-            title: const Text('Dark'),
-            subtitle: const Text('Always use dark theme'),
-            value: ThemeMode.dark,
-            groupValue: _selectedMode,
-            onChanged: _handleModeSelected,
-          ),
-          RadioListTile<ThemeMode>(
-            title: const Text('System'),
-            subtitle: const Text('Follow device setting'),
-            value: ThemeMode.system,
-            groupValue: _selectedMode,
-            onChanged: _handleModeSelected,
-          ),
-        ],
+      content: RadioGroup<ThemeMode>(
+        groupValue: _selectedMode,
+        onChanged: _handleModeSelected,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<ThemeMode>(
+              title: const Text('Light'),
+              subtitle: const Text('Always use light theme'),
+              value: ThemeMode.light,
+            ),
+            RadioListTile<ThemeMode>(
+              title: const Text('Dark'),
+              subtitle: const Text('Always use dark theme'),
+              value: ThemeMode.dark,
+            ),
+            RadioListTile<ThemeMode>(
+              title: const Text('System'),
+              subtitle: const Text('Follow device setting'),
+              value: ThemeMode.system,
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
