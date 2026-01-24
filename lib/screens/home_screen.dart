@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import '../models/grocery_item.dart';
 import '../widgets/recipe_details_panel.dart';
+import '../widgets/theme_selector_dialog.dart';
 import 'recipe_list_screen.dart';
 import 'grocery_list_screen.dart';
 
@@ -241,20 +242,41 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
+  /// Opens the theme selector dialog.
+  ///
+  /// Shows a dialog with options for Light, Dark, or System theme.
+  /// When the user selects a theme, it is applied immediately and
+  /// persisted for future app sessions.
+  Future<void> _openThemeSelector() async {
+    final themeProvider = ThemeScope.of(context);
+    final selectedMode = await ThemeSelectorDialog.show(
+      context,
+      currentMode: themeProvider.themeMode,
+    );
+
+    if (selectedMode != null) {
+      await themeProvider.setThemeMode(selectedMode);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Snack App'),
-        actions: _currentTabIndex == 1
-            ? [
-                IconButton(
-                  icon: const Icon(Icons.delete_sweep),
-                  tooltip: 'Clear all items',
-                  onPressed: _groceryItems.isEmpty ? null : _showClearAllDialog,
-                ),
-              ]
-            : null,
+        actions: [
+          if (_currentTabIndex == 1)
+            IconButton(
+              icon: const Icon(Icons.delete_sweep),
+              tooltip: 'Clear all items',
+              onPressed: _groceryItems.isEmpty ? null : _showClearAllDialog,
+            ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
+            onPressed: _openThemeSelector,
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
